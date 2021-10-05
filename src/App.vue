@@ -3,7 +3,12 @@
 
 		<VDatePicker
 			:date="new Date()"
-		/>
+			:cellSize="30"
+		>
+			<template v-slot:item="item">
+				{{ item.day }}
+			</template>
+		</VDatePicker>
 		
 	</div>
 </template>
@@ -26,7 +31,6 @@ export default {
 	box-sizing: border-box;
 }
 .wrapper {
-	border: 1px solid red;
 	width: 100vw;
 	height: 100vh;
 	display: flex;

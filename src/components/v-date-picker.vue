@@ -1,14 +1,20 @@
 <template>
-	<div class="v-date-picker-container">
+	<div class="v-date-picker-wrapper">
 
-		<div class="v-date-picker">
-			<span v-for="({ type, day }, i) of calendarDays"
+		<div class="v-date-picker-container"
+			:style="SET_STYLE_CALENDAR_CONTAINER"
+		>
+			<VDay
+				v-for="({ type, day }, i) of calendarDays"
 				:key="i"
-				class="day-item"
-				:style="type !== 'curr' ? { background: '#999' } : { background: '#fff' }"
+				:type="type"
+				:day="day"
+				:cellSize="cellSize"
 			>
-				{{ day }}
-			</span>
+				<slot name="item"
+					v-bind="{ type, day, i }"
+				/>
+			</VDay>
 		</div>
 
 		<div class="buttons">
@@ -25,23 +31,32 @@
 </template>
 
 <script>
+import VDay from './v-day.vue'
+
 export default {
 	name: 'VDatePicker',
+	components: {
+		VDay
+	},
 	props: {
 		date: {
 			type: Date,
 			default: new Date
+		},
+		cellSize: {
+			type: Number,
+			default: 36
 		}
 	},
 	data: () => ({
 		days: {
-			1: 'Понедельник',
-			2: 'Вторник',
-			3: 'Среда',
-			4: 'Четверг',
-			5: 'Пятница',
-			6: 'Суббота',
-			7: 'Воскресенье'
+			1: 'Пн',
+			2: 'Вт',
+			3: 'Ср',
+			4: 'Чт',
+			5: 'Пт',
+			6: 'Сб',
+			7: 'Вс'
 		},
 		months: {
 			1: 'Январь',
@@ -60,7 +75,7 @@ export default {
 		calendarDays: [],
 		totalDays: 42,
 		lastMonth: 12,
-		lastDayWeek: 7,
+		dayWeeks: 7,
 		currMonth: null,
 		currYear: null,
 	}),
@@ -70,7 +85,7 @@ export default {
 		},
 		getCurrFirstDayWeekId() {
 			const FIRST_DAY = new Date(`${this.currYear}-${this.currMonth}-1`).getDay()
-			return FIRST_DAY === 0 ? this.lastDayWeek : FIRST_DAY
+			return FIRST_DAY === 0 ? this.dayWeeks : FIRST_DAY
 		},
 		getNextMonthId() {
 			return this.currMonth + 1 > this.lastMonth ? 1 : this.currMonth + 1
@@ -84,6 +99,13 @@ export default {
 		getLastDayPrevMonth() {
 			return new Date(new Date(`${this.currYear}-${this.currMonth}-1`) - 1).getDate()
 		},
+
+		SET_STYLE_CALENDAR_CONTAINER() {
+			return {
+				width: `${(this.cellSize * 7) + 7 * 7}px`,
+				height: `${(this.cellSize * 6) + 6 * 6}px`,
+			}
+		}
 	},
 	methods: {
 		calculateMonth(count) {
@@ -133,16 +155,11 @@ export default {
 </script>
 
 <style lang="scss">
-	.v-date-picker-container {
-		// width: 300px;
-		// height: calc(300px - (36px + 4px));
-		width: calc(36px * 8.3);
-		height: calc(36px * 7);
+	.v-date-picker-wrapper {
 		margin: auto;
 		user-select: none;
 	}
-
-	.v-date-picker {
+	.v-date-picker-container {
 		width: 100%;
 		height: 100%;
 		border: 1px solid #000;
@@ -150,15 +167,6 @@ export default {
 		justify-content: space-between;
 		align-content: space-between;
 		flex-wrap: wrap;
-	}
-	.day-item {
-		// max-width: 36px;
-		height: 36px;
-		flex: 0 0 calc((100% - 36px) / 7);
-		border: 1px solid #000;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 	}
 	.buttons {
 		display: flex;
