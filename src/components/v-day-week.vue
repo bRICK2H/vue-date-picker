@@ -1,24 +1,16 @@
 <template>
-	<span class="v-calendar-day"
+	<span class="v-calendar-day-week"
 		:style="SET_STYLE_CELL"
 	>
-
-		<slot>
-			{{ day }}
-		</slot>
-
+		{{ dayWeek }}
 	</span>
 </template>
 
 <script>
 export default {
-	name: 'VDay',
+	name: 'VDayWeek',
 	props: {
-		day: {
-			type: Number,
-			required: true
-		},
-		type: {
+		dayWeek: {
 			type: String,
 			required: true
 		},
@@ -32,7 +24,6 @@ export default {
 			return {
 				flex: `0 0 calc((100% - ${this.cellSize}px) / 7)`,
 				height: `${this.cellSize}px`,
-				background: this.type !== 'curr' ? '#999' : '#fff'
 			}
 		}
 	}
@@ -40,8 +31,7 @@ export default {
 </script>
 
 <style lang="scss">
-	.v-calendar-day {
-		border: 1px solid #000;
+	.v-calendar-day-week {
 		display: flex;
 		align-items: center;
 		justify-content: center;

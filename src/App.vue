@@ -5,9 +5,9 @@
 			:date="new Date()"
 			:cellSize="30"
 		>
-			<template v-slot:item="item">
+			<!-- <template v-slot:item="item">
 				{{ item.day }}
-			</template>
+			</template> -->
 		</VDatePicker>
 		
 	</div>
