@@ -3,10 +3,12 @@
 
 		<VDatePicker
 			:date="new Date()"
-			:cellSize="30"
+			:cellSize="36"
 		>
 			<!-- <template v-slot:item="item">
-				{{ item.day }}
+				<span style="color:red">
+					{{ item.day }}
+				</span>
 			</template> -->
 		</VDatePicker>
 		

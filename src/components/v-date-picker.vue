@@ -119,10 +119,9 @@ export default {
 		},
 
 		setStyleCalendarContainer() {
-			// const SIZE_CONTAINER = `${(this.cellSize * 7) + this.cellSize + 7}px`
 			return {
 				width: `${(this.cellSize * 7) + this.cellSize + 7}px`,
-				height: `${(this.cellSize * 6) + this.cellSize + 6}px`,
+				height: `${(this.cellSize * 6) + this.cellSize}px`,
 			}
 		}
 	},
