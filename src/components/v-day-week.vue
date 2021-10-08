@@ -22,8 +22,9 @@ export default {
 	computed: {
 		SET_STYLE_CELL() {
 			return {
+				fontSize: `${(this.cellSize / 2)}px`,
 				flex: `0 0 calc((100% - ${this.cellSize}px) / 7)`,
-				height: `${this.cellSize}px`,
+				height: `calc((100% - ${this.cellSize}px) / 7)`,
 			}
 		}
 	}

@@ -31,8 +31,9 @@ export default {
 		SET_STYLE_CELL() {
 			return {
 				flex: `0 0 calc((100% - ${this.cellSize}px) / 7)`,
-				height: `${this.cellSize}px`,
-				background: this.type !== 'curr' ? '#999' : '#fff'
+				height: `calc((100% - ${this.cellSize}px) / 7)`,
+				background: this.type !== 'curr' ? '#999' : '#fff',
+				fontSize: `${(this.cellSize / 2)}px`,
 			}
 		}
 	}
@@ -41,7 +42,7 @@ export default {
 
 <style lang="scss">
 	.v-calendar-day {
-		border: 1px solid #000;
+		// border: 1px solid #000;
 		display: flex;
 		align-items: center;
 		justify-content: center;

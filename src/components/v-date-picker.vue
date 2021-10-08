@@ -2,8 +2,10 @@
 	<div class="v-date-picker-container">
 
 		<div class="v-date-picker-header v-date-picker-container__v-date-picker-header">
-			<button @click="calculateMonth(-1)">left</button>
-			<div>
+			<span class="v-date-btn v-date-prev"
+				@click="calculateMonth(-1)"
+			>&larr;</span>
+			<div :style="{ fontSize: `${this.cellSize - 7}px` }">
 				<span>
 					{{ getCurrMonth }}
 				</span>
@@ -11,24 +13,25 @@
 					{{ currYear }}
 				</span>
 			</div>
-			<button @click="calculateMonth(1)">right</button>
+			<span class="v-date-btn v-date-next"
+				@click="calculateMonth(1)"
+			>&rarr;</span>
 		</div>
 		
 		<div class="v-date-picker-body"
+			:style="setStyleCalendarContainer"
 		>
 			<!-- Days week -->
-			<div class="v-days-week-container">
+			<!-- <div class="v-days-week-container"> -->
 				<VDayWeek v-for="(dayWeek, i) of daysWeek"
 					:key="`${dayWeek}:${i}`"
 					:dayWeek="dayWeek"
 					:cellSize="cellSize"
 				/>
-			</div>
+			<!-- </div> -->
 
 			<!-- Days -->
-			<div class="v-days-container"
-				:style="setStyleCalendarContainer"
-			>
+			<!-- <div class="v-days-container"> -->
 				<VDay
 					v-for="({ type, day }, i) of calendarDays"
 					:key="`${day}:${i}`"
@@ -40,7 +43,7 @@
 						v-bind="{ type, day, i }"
 					/>
 				</VDay>
-			</div>
+			<!-- </div> -->
 		</div>
 
 	</div>
@@ -121,7 +124,7 @@ export default {
 		setStyleCalendarContainer() {
 			return {
 				width: `${(this.cellSize * 7) + this.cellSize + 7}px`,
-				height: `${(this.cellSize * 6) + this.cellSize}px`,
+				height: `${(this.cellSize * 7) + this.cellSize + 7}px`,
 			}
 		}
 	},
@@ -187,20 +190,15 @@ export default {
 	.v-date-picker-header {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
 	}
 	.v-date-picker-body {
 		display: flex;
-		flex-direction: column;
-	}
-	.v-days-week-container,
-	.v-days-container {
-		display: flex;
-		justify-content: space-between;
-		align-content: space-between;
 		flex-wrap: wrap;
+		justify-content: space-around;
+		align-content: space-around;
 	}
-
-	.days-move {
-		transition: transform 1s;
+	.v-date-btn {
+		cursor: pointer;
 	}
 </style>
