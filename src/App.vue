@@ -3,7 +3,8 @@
 
 		<VDatePicker
 			:date="new Date()"
-			:cellSize="36"
+			:cellSize="50"
+			@input="input"
 		>
 			<!-- <template v-slot:item="item">
 				<span style="color:red">
@@ -22,11 +23,18 @@ export default {
 	name: 'VDatePickerWrapper',
 	components: {
 		VDatePicker
+	},
+	methods: {
+		input(val) {
+			console.warn('input', val)
+		}
 	}
 }
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 * {
 	margin: 0;
 	padding: 0;
@@ -36,5 +44,10 @@ export default {
 	width: 100vw;
 	height: 100vh;
 	display: flex;
+
+	&__v-date-picker-container {
+		font-family: 'Inter', sans-serif;
+		font-weight: 400;
+	}
 }
 </style>

@@ -1,17 +1,12 @@
 <template>
-	<div class="v-date-picker-container">
+	<div class="v-date-picker-container wrapper__v-date-picker-container">
 
 		<div class="v-date-picker-header v-date-picker-container__v-date-picker-header">
 			<span class="v-date-btn v-date-prev"
 				@click="calculateMonth(-1)"
 			>&larr;</span>
-			<div :style="{ fontSize: `${this.cellSize - 7}px` }">
-				<span>
-					{{ getCurrMonth }}
-				</span>
-				<span>
-					{{ currYear }}
-				</span>
+			<div :style="setStyleTitle">
+				<span class="v-date-picker-title">{{ getCurrMonth }}, {{ currYear }}</span>
 			</div>
 			<span class="v-date-btn v-date-next"
 				@click="calculateMonth(1)"
@@ -21,29 +16,25 @@
 		<div class="v-date-picker-body"
 			:style="setStyleCalendarContainer"
 		>
-			<!-- Days week -->
-			<!-- <div class="v-days-week-container"> -->
-				<VDayWeek v-for="(dayWeek, i) of daysWeek"
-					:key="`${dayWeek}:${i}`"
-					:dayWeek="dayWeek"
-					:cellSize="cellSize"
-				/>
-			<!-- </div> -->
+			<VDayWeek v-for="(dw, i) of daysWeek"
+				:key="`${dw}:${i}`"
+				:dayWeek="dw"
+				:cellSize="cellSize"
+			/>
 
-			<!-- Days -->
-			<!-- <div class="v-days-container"> -->
-				<VDay
-					v-for="({ type, day }, i) of calendarDays"
-					:key="`${day}:${i}`"
-					:type="type"
-					:day="day"
-					:cellSize="cellSize"
-				>
-					<slot name="item"
-						v-bind="{ type, day, i }"
-					/>
-				</VDay>
-			<!-- </div> -->
+			<VDay
+				v-for="({ type, day, selected = null }, i) of calendarDays"
+				:key="`${day}:${i}`"
+				:type="type"
+				:day="day"
+				:selected="selected"
+				:cellSize="cellSize"
+				@select-day="selectDay(type, i, day)"
+			>
+				<slot name="item"
+					v-bind="{ type, day, i }"
+				/>
+			</VDay>
 		</div>
 
 	</div>
@@ -52,6 +43,7 @@
 <script>
 import VDay from './v-day.vue'
 import VDayWeek from './v-day-week.vue'
+import { generateDays } from '../utility'
 
 export default {
 	name: 'VDatePicker',
@@ -97,8 +89,11 @@ export default {
 		totalDays: 42,
 		lastMonth: 12,
 		dayWeeks: 7,
+		currDay: null,
 		currMonth: null,
 		currYear: null,
+		initDate: {},
+		selectedDate: {}
 	}),
 	computed: {
 		getCurrMonth() {
@@ -108,15 +103,16 @@ export default {
 			const FIRST_DAY = new Date(`${this.currYear}-${this.currMonth}-1`).getDay()
 			return FIRST_DAY === 0 ? this.dayWeeks : FIRST_DAY
 		},
+		getCurrLastDayMonth() {
+			return new Date(new Date(`${this.currYear}-${this.getNextMonthId}-1`) - 1).getDate()
+		},
 		getNextMonthId() {
 			return this.currMonth + 1 > this.lastMonth ? 1 : this.currMonth + 1
 		},
 		getPrevMonthId() {
 			return this.currMonth - 1 === 0 ? this.lastMonth : this.currMonth - 1
 		},
-		getLastDayCurrMonth() {
-			return new Date(new Date(`${this.currYear}-${this.getNextMonthId}-1`) - 1).getDate()
-		},
+
 		getLastDayPrevMonth() {
 			return new Date(new Date(`${this.currYear}-${this.currMonth}-1`) - 1).getDate()
 		},
@@ -126,6 +122,9 @@ export default {
 				width: `${(this.cellSize * 7) + this.cellSize + 7}px`,
 				height: `${(this.cellSize * 7) + this.cellSize + 7}px`,
 			}
+		},
+		setStyleTitle() {
+			return { fontSize: `${this.cellSize / 2}px` }
 		}
 	},
 	methods: {
@@ -145,28 +144,72 @@ export default {
 		},
 		createCalendar() {
 			const PREV_AMOUNT_DAYS = this.getCurrFirstDayWeekId - 1
-			const GENERATE_DAYS = (days, type, counter) => {
-				return new Array(days)
-					.fill(null)
-					.map((c, i) => ({ type, day: i + counter }))
-			}
 			const PREV_DAYS = PREV_AMOUNT_DAYS > 0
-				? GENERATE_DAYS(PREV_AMOUNT_DAYS, 'prev', this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1))
+				? generateDays(PREV_AMOUNT_DAYS, 'prev', this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1))
 				: []
-			const CURR_DAYS = GENERATE_DAYS(this.getLastDayCurrMonth, 'curr', 1)
-			const NEXT_DAYS = GENERATE_DAYS(this.totalDays - (PREV_DAYS.length + CURR_DAYS.length), 'next', 1)
+			const CURR_DAYS = generateDays(this.getCurrLastDayMonth, 'curr', 1)
+			const NEXT_DAYS = generateDays(this.totalDays - (PREV_DAYS.length + CURR_DAYS.length), 'next', 1)
 			console.log({PREV_DAYS, CURR_DAYS, NEXT_DAYS})
 
 			this.calendarDays = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
+
+			if (this.selectedDate?.date) {
+				const {
+					selectedYear,
+					selectedMonth,
+					index: i
+				} = this.selectedDate
+
+				if (selectedMonth === this.currMonth && selectedYear === this.currYear) {
+					this.$set(this.calendarDays[i], 'selected', true)
+				}
+			} else {
+				const {
+					day,
+					month,
+					year
+				} = this.initDate
+				const currIndex = this.calendarDays.findIndex(c => c.type === 'curr' && c.day === day)
+
+				if (month === this.currMonth && year === this.currYear) {
+					this.$set(this.calendarDays[currIndex], 'selected', true)
+				}
+			}
+		},
+		selectDay(type, i, day) {
+
+			if (type === 'curr') {
+				this.calendarDays.forEach(c => {
+					if (c.selected !== undefined) {
+						this.$delete(c, 'selected')
+					}
+				})
+
+				this.$set(this.calendarDays[i], 'selected', true)
+				this.selectedDate = {
+					index: i,
+					selectedYear: this.currYear,
+					selectedMonth: this.currMonth,
+					date: new Date(`${this.currYear}-${this.currMonth}-${day}`)
+				}
+
+				this.$emit('input', this.selectedDate.date)
+			}
 		}
 	},
 	watch: {
 		date: {
 			immediate: true,
 			handler(dt) {
-				console.log(dt)
+				console.log('watch: dt', dt)
+				this.currDay = dt.getDate()
 				this.currMonth = dt.getMonth() + 1
 				this.currYear = dt.getFullYear()
+				this.initDate = Object.freeze({
+					day: this.currDay,
+					month: this.currMonth,
+					year: this.currYear
+				})
 
 				this.createCalendar()
 			}
@@ -179,9 +222,11 @@ export default {
 	.v-date-picker-container {
 		margin: auto;
 		user-select: none;
-		border: 1px solid #000;
-		padding: 7px;
+		background-color: #fff;
+		padding: 24px;
 		border-radius: 12px;
+		box-shadow: 0px 12px 32px -4px rgba(26, 32, 44, .08),
+						0px 0px 12px -3px rgba(26, 32, 44, .04);
 
 		&__v-date-picker-header {
 			margin-bottom: 10px;
@@ -200,5 +245,9 @@ export default {
 	}
 	.v-date-btn {
 		cursor: pointer;
+	}
+	.v-date-picker-title {
+		font-weight: 600;
+		color: #1f1f33;
 	}
 </style>

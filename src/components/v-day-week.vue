@@ -1,6 +1,6 @@
 <template>
-	<span class="v-calendar-day-week"
-		:style="SET_STYLE_CELL"
+	<span class="v-day-week"
+		:style="setStyleCell"
 	>
 		{{ dayWeek }}
 	</span>
@@ -20,9 +20,9 @@ export default {
 		},
 	},
 	computed: {
-		SET_STYLE_CELL() {
+		setStyleCell() {
 			return {
-				fontSize: `${(this.cellSize / 2)}px`,
+				fontSize: `${(this.cellSize / 2.5)}px`,
 				flex: `0 0 calc((100% - ${this.cellSize}px) / 7)`,
 				height: `calc((100% - ${this.cellSize}px) / 7)`,
 			}
@@ -32,10 +32,12 @@ export default {
 </script>
 
 <style lang="scss">
-	.v-calendar-day-week {
+	.v-day-week {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		position: relative;
+		font-weight: 700;
+		color: #a2a2b9;
 	}
 </style>
