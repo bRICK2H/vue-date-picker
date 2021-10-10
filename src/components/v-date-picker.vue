@@ -29,6 +29,7 @@
 				:day="day"
 				:selected="selected"
 				:cellSize="cellSize"
+				:isActiveOutside="isActiveOutside"
 				@select-day="selectDay(type, i, day)"
 			>
 				<slot name="item"
@@ -59,6 +60,10 @@ export default {
 		cellSize: {
 			type: Number,
 			default: 36
+		},
+		isActiveOutside: {
+			type: Boolean,
+			default: false
 		}
 	},
 	data: () => ({
@@ -144,9 +149,10 @@ export default {
 		},
 		createCalendar() {
 			const PREV_AMOUNT_DAYS = this.getCurrFirstDayWeekId - 1
+			console.warn(PREV_AMOUNT_DAYS)
 			const PREV_DAYS = PREV_AMOUNT_DAYS > 0
 				? generateDays(PREV_AMOUNT_DAYS, 'prev', this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1))
-				: []
+				: generateDays(this.dayWeeks, 'prev', this.getLastDayPrevMonth - (this.dayWeeks - 1))
 			const CURR_DAYS = generateDays(this.getCurrLastDayMonth, 'curr', 1)
 			const NEXT_DAYS = generateDays(this.totalDays - (PREV_DAYS.length + CURR_DAYS.length), 'next', 1)
 			console.log({PREV_DAYS, CURR_DAYS, NEXT_DAYS})
@@ -157,11 +163,44 @@ export default {
 				const {
 					selectedYear,
 					selectedMonth,
-					index: i
+					type,
+					day,
+					i
 				} = this.selectedDate
+
+				console.warn({
+					currMonth: this.currMonth,
+					selectedMonth,
+					currYea: this.currYear,
+					selectedYear,
+				})
+
+				// if (selectedMonth === this.currMonth && selectedYear === this.currYear) {
+				// 	this.$set(this.calendarDays[i], 'selected', true)
+				// }
 
 				if (selectedMonth === this.currMonth && selectedYear === this.currYear) {
 					this.$set(this.calendarDays[i], 'selected', true)
+				} else if ((type === 'prev' || type === 'next') && (selectedMonth - 1 === this.currMonth || selectedMonth + 1 === this.currMonth)) {
+					const ind = this.calendarDays.findIndex(c => c.type === 'curr' && c.day === day)
+
+					if (ind !== -1) {
+						this.$set(this.calendarDays[ind], 'selected', true)
+					}
+				} else if (type === 'curr') {
+					if (selectedMonth - 1 === this.currMonth) {
+						const ind = this.calendarDays.findIndex(c => c.type === 'next' && c.day === day)
+						
+						if (ind !== -1) {
+							this.$set(this.calendarDays[ind], 'selected', true)
+						}
+					} else if (selectedMonth + 1 === this.currMonth) {
+						const ind = this.calendarDays.findIndex(c => c.type === 'prev' && c.day === day)
+						
+						if (ind !== -1) {
+							this.$set(this.calendarDays[ind], 'selected', true)
+						}
+					}
 				}
 			} else {
 				const {
@@ -176,7 +215,36 @@ export default {
 				}
 			}
 		},
+		// selectDay(type, i, day) {
+		// 	if (type === 'curr') {
+		// 		this.calendarDays.forEach(c => {
+		// 			if (c.selected !== undefined) {
+		// 				this.$delete(c, 'selected')
+		// 			}
+		// 		})
+
+		// 		this.$set(this.calendarDays[i], 'selected', true)
+		// 		this.selectedDate = {
+		// 			index: i,
+		// 			selectedYear: this.currYear,
+		// 			selectedMonth: this.currMonth,
+		// 			date: new Date(`${this.currYear}-${this.currMonth}-${day}`)
+		// 		}
+
+		// 		this.$emit('input', this.selectedDate.date)
+		// 	}
+		// },
 		selectDay(type, i, day) {
+			this.currDay = day
+
+			this.selectedDate = {
+				i,
+				day,
+				type,
+				selectedYear: this.currYear,
+				selectedMonth: this.currMonth,
+				date: new Date(`${this.currYear}-${this.currMonth}-${day}`)
+			}
 
 			if (type === 'curr') {
 				this.calendarDays.forEach(c => {
@@ -184,17 +252,18 @@ export default {
 						this.$delete(c, 'selected')
 					}
 				})
-
+	
 				this.$set(this.calendarDays[i], 'selected', true)
-				this.selectedDate = {
-					index: i,
-					selectedYear: this.currYear,
-					selectedMonth: this.currMonth,
-					date: new Date(`${this.currYear}-${this.currMonth}-${day}`)
+			} else if (this.isActiveOutside) {
+				console.log('outside click', { type, i, day })
+				if (type === 'prev') {
+					this.calculateMonth(-1)
+				} else if (type === 'next') {
+					this.calculateMonth(1)
 				}
-
-				this.$emit('input', this.selectedDate.date)
 			}
+
+			this.$emit('input', this.selectedDate.date)
 		}
 	},
 	watch: {
@@ -229,7 +298,7 @@ export default {
 						0px 0px 12px -3px rgba(26, 32, 44, .04);
 
 		&__v-date-picker-header {
-			margin-bottom: 10px;
+			margin-bottom: 20px;
 		}
 	}
 	.v-date-picker-header {

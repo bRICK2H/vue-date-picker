@@ -1,8 +1,8 @@
 <template>
 	<div class="v-day-container"
 		:style="setStyleCell"
-		:class="[setClassCell, setClassActiveCell]"
-		@click="$emit('select-day')"
+		:class="[setClassCell, setClassActiveCell, setClassHoverOutsideCell]"
+		@click="selectDay"
 	>
 
 		<slot>
@@ -34,6 +34,10 @@ export default {
 			type: Number,
 			required: true
 		},
+		isActiveOutside: {
+			type: Boolean,
+			required: true
+		}
 	},
 	computed: {
 		setStyleCell() {
@@ -47,7 +51,21 @@ export default {
 			return `v-day-container--${this.type}`
 		},
 		setClassActiveCell() {
-			return this.selected ? `v-day-container--active` : null
+			return this.selected
+				? `v-day-container--active`
+				: null
+		},
+		setClassHoverOutsideCell() {
+			return this.type !== 'curr' && this.isActiveOutside
+				? `v-day-container--hover-outside`
+				: null
+		}
+	},
+	methods: {
+		selectDay() {
+			if (this.type === 'curr' || this.isActiveOutside) {
+				this.$emit('select-day')
+			}
 		}
 	}
 }
@@ -56,16 +74,16 @@ export default {
 <style lang="scss">
 	.v-day-container {
 		position: relative;
+		border-radius: 50%;
+		border: 3px solid transparent;
 		transition: .2s;
 
 		&--prev,
 		&--next {
-			opacity: .3;
+			opacity: .2;
 		}
 		&--curr {
 			cursor: pointer;
-			border-radius: 50%;
-			border: 3px solid transparent;
 			background-color: #fff;
 
 			&:hover {
@@ -76,9 +94,13 @@ export default {
 			font-weight: 700;
 			color: #fff;
 			background-color: #76768c;
+		}
+		&--hover-outside {
+			opacity: .4;
+			cursor: pointer;
 
 			&:hover {
-				border: 3px solid rgba(31, 31, 51, .4);
+				border: 3px solid rgba(31, 31, 51, .3);
 			}
 		}
 	}
