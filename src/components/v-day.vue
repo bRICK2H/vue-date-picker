@@ -28,13 +28,13 @@ export default {
 		},
 		selected: {
 			type: Boolean,
-			default: null
+			default: false
 		},
 		cellSize: {
 			type: Number,
 			required: true
 		},
-		isActiveOutside: {
+		isActiveOutsideDays: {
 			type: Boolean,
 			required: true
 		}
@@ -56,14 +56,14 @@ export default {
 				: null
 		},
 		setClassHoverOutsideCell() {
-			return this.type !== 'curr' && this.isActiveOutside
+			return this.type !== 'curr' && this.isActiveOutsideDays
 				? `v-day-container--hover-outside`
 				: null
 		}
 	},
 	methods: {
 		selectDay() {
-			if (this.type === 'curr' || this.isActiveOutside) {
+			if (this.type === 'curr' || this.isActiveOutsideDays) {
 				this.$emit('select-day')
 			}
 		}

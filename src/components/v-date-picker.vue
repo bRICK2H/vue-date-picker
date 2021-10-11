@@ -24,7 +24,8 @@
 			></span>
 		</div>
 		
-		<div class="v-date-picker-body"
+		<div v-if="template['days']"
+			class="v-date-picker-body"
 			:style="setStyleCalendarContainer"
 		>
 			<VDayWeek v-for="(dw, i) of daysWeek"
@@ -34,19 +35,42 @@
 			/>
 
 			<VDay
-				v-for="({ type, day, month, year, selected = null }, i) of calendarDays"
+				v-for="({ type, day, month, year, selected = false }, i) of calendarDays"
 				:key="`${day}:${i}`"
 				:type="type"
 				:day="day"
 				:selected="selected"
 				:cellSize="cellSize"
-				:isActiveOutside="isActiveOutside"
+				:isActiveOutsideDays="isActiveOutsideDays"
 				@select-day="selectDay(i, type, day, month, year)"
 			>
 				<slot name="item"
 					v-bind="{ type, day, i }"
 				/>
 			</VDay>
+		</div>
+
+		<div v-if="template['months']"
+			style="display:flex; flex-wrap: wrap; justify-content: space-around; align-items: center;"
+			:style="{
+				width: `${((cellSize * 7 + this.cellSize + 7) / 3) * 3}px`,
+				height: `${(this.cellSize * 7 + this.cellSize + 7) / 3 * 3}px`	
+			}"
+		>
+			<div v-for="(month, key) of months"
+				:key="key"
+				style="display: flex; justify-content: center; align-items: center; border-radius: 12px; cursor: pointer"
+				:style="{
+					width: `${(cellSize * 7) / 3}px`,
+					height: `${(cellSize * 7) / 4}px`,
+					background: currMonth === +key ? '#76768c' : '#fff',
+					color: currMonth === +key ? '#fff' : '#1f1f33',
+					fontWeight: currMonth === +key ? 700 : 400
+				}"
+				@click="currMonth = +key"
+			>
+				{{ month }}
+			</div>
 		</div>
 
 	</div>
@@ -72,7 +96,7 @@ export default {
 			type: Number,
 			default: 36
 		},
-		isActiveOutside: {
+		isActiveOutsideDays: {
 			type: Boolean,
 			default: false
 		}
@@ -101,14 +125,19 @@ export default {
 			11: 'Ноябрь',
 			12: 'Декабрь'
 		},
+		template: {
+			days: false,
+			months: true,
+			years: false
+		},
 		calendarDays: [],
-		totalDays: 42,
-		lastMonth: 12,
-		dayWeeks: 7,
+		selectedDate: {},
+		amountDays: 42,
+		amountMonth: 12,
+		amountDayWeeks: 7,
 		currDay: null,
 		currMonth: null,
 		currYear: null,
-		selectedDate: {}
 	}),
 	computed: {
 		getCurrMonth() {
@@ -116,14 +145,14 @@ export default {
 		},
 		getCurrFirstDayWeekId() {
 			const FIRST_DAY = new Date(`${this.currYear}-${this.currMonth}-1`).getDay()
-			return FIRST_DAY === 0 ? this.dayWeeks : FIRST_DAY
+			return FIRST_DAY === 0 ? this.amountDayWeeks : FIRST_DAY
 		},
 		getCurrLastDayMonth() {
 			return new Date(new Date(`${this.currYear}-${this.getNextMonth}-1`) - 1).getDate()
 		},
 		getPrevMonth() {
 			return this.currMonth === 1
-				? this.lastMonth
+				? this.amountMonth
 				: this.currMonth - 1
 		},
 		getLastDayPrevMonth() {
@@ -135,12 +164,12 @@ export default {
 				: this.currYear
 		},
 		getNextMonth() {
-			return this.currMonth === this.lastMonth
+			return this.currMonth === this.amountMonth
 				? 1
 				: this.currMonth + 1
 		},
 		getNextYear() {
-			return this.currMonth === this.lastMonth
+			return this.currMonth === this.amountMonth
 				? this.currYear + 1
 				: this.currYear
 		},
@@ -162,11 +191,11 @@ export default {
 		calculateMonth(count) {
 			this.currMonth += count
 
-			if (this.currMonth > this.lastMonth) {
+			if (this.currMonth > this.amountMonth) {
 				this.currMonth = 1
 				this.currYear += 1
 			} else if (this.currMonth < 1) {
-				this.currMonth = this.lastMonth
+				this.currMonth = this.amountMonth
 				this.currYear -= 1
 			}
 
@@ -202,7 +231,7 @@ export default {
 	
 				this.$set(this.calendarDays[i], 'selected', true)
 
-			} else if (this.isActiveOutside) {
+			} else if (this.isActiveOutsideDays) {
 				this.createCalendar()
 			}
 
@@ -234,8 +263,8 @@ export default {
 							)
 						: generateDays(
 								type,
-								this.dayWeeks,
-								this.getLastDayPrevMonth - (this.dayWeeks - 1),
+								this.amountDayWeeks,
+								this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
 								this.getPrevMonth,
 								this.getPrevYear
 							)
@@ -254,7 +283,7 @@ export default {
 				case 'next': {
 					return generateDays(
 						type,
-						this.totalDays - (prevDays.length + currDays.length),
+						this.amountDays - (prevDays.length + currDays.length),
 						1,
 						this.getNextMonth,
 						this.getNextYear
