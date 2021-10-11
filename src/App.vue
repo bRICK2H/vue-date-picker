@@ -8,7 +8,7 @@
 			@input="input"
 		>
 			<!-- <template v-slot:item="item">
-				<span style="color:red">
+				<span style="color:pink">
 					{{ item.day }}
 				</span>
 			</template> -->
