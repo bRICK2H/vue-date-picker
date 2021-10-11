@@ -2,16 +2,26 @@
 	<div class="v-date-picker-container wrapper__v-date-picker-container">
 
 		<div class="v-date-picker-header v-date-picker-container__v-date-picker-header">
-			<span class="v-date-btn v-date-prev"
+			<span class="v-date-picker-btn v-date-picker-prev"
+				:style="setStyleHeaderBtn"
 				@click="calculateMonth(-1)"
-			>&larr;</span>
-			<div :style="setStyleTitle" class="v-date-picker-title">
-				<span @click="openMonths">{{ getCurrMonth }},&nbsp;</span>
-				<span @click="openYears">{{ currYear }}</span>
+			></span>
+			<div :style="setStyleTitle" class="v-date-picker-box-title">
+				<span class="v-date-picker-month-title"
+					@click="openMonths"
+				>
+					{{ getCurrMonth }},
+				</span>
+				<span class="v-date-picker-year-title"
+					@click="openYears"
+				>
+					{{ currYear }}
+				</span>
 			</div>
-			<span class="v-date-btn v-date-next"
+			<span class="v-date-picker-btn v-date-picker-next"
+				:style="setStyleHeaderBtn"
 				@click="calculateMonth(1)"
-			>&rarr;</span>
+			></span>
 		</div>
 		
 		<div class="v-date-picker-body"
@@ -143,7 +153,10 @@ export default {
 		},
 		setStyleTitle() {
 			return { fontSize: `${this.cellSize / 2}px` }
-		}
+		},
+		setStyleHeaderBtn() {
+			return { width: `calc(${(this.cellSize / 2) - 3}px)`, height: `calc(${Math.ceil(this.cellSize / 3)}px )` }
+		},
 	},
 	methods: {
 		calculateMonth(count) {
@@ -160,33 +173,25 @@ export default {
 			this.createCalendar()
 		},
 		createCalendar() {
-			const { month } = this.selectedDate
-			const CURR_AREA_MONTHS = {
-				[this.getPrevMonth]: 'prev',
-				[this.currMonth]: 'curr',
-				[this.getNextMonth]: 'next'
-			}
+			const { year, month, day } = this.selectedDate
 			const PREV_DAYS = this.getDays('prev')
 			const CURR_DAYS = this.getDays('curr')
 			const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
-			const CURR_TYPE_MONTH = CURR_AREA_MONTHS[month]
-
 			this.calendarDays = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
 
-			if (CURR_TYPE_MONTH) {
-				const INDEX_DATE = this.calendarDays.findIndex(c => c.type === CURR_TYPE_MONTH && c.day === this.currDay)
-				
-				if (INDEX_DATE !== -1) {
-					this.$set(this.calendarDays[INDEX_DATE], 'selected', true)
-				}
+			const INDEX_DATE = this.calendarDays.findIndex(c => {
+				return c.month === month && c.year === year && c.day === day
+			})
+			
+			if (INDEX_DATE !== -1) {
+				this.$set(this.calendarDays[INDEX_DATE], 'selected', true)
 			}
 		},
 		selectDay(i, type, day, month, year) {
 			this.currDay = day
 			this.currMonth = month
 			this.currYear = year
-
-			this.$set(this.selectedDate, 'month', month)
+			this.setSelectedDate(year, month, day)
 
 			if (type === 'curr') {
 				this.calendarDays.forEach(c => {
@@ -203,6 +208,11 @@ export default {
 
 			this.$emit('input', new Date(`${year}-${month}-${day}`))
 		},
+		setSelectedDate(y, m, d) {
+			this.$set(this.selectedDate, 'year', y)
+			this.$set(this.selectedDate, 'month', m)
+			this.$set(this.selectedDate, 'day', d)
+		},
 		openMonths() {
 			console.log('openMonths')
 		},
@@ -214,14 +224,22 @@ export default {
 				case 'prev': {
 					const PREV_AMOUNT_DAYS = this.getCurrFirstDayWeekId - 1
 
-					return generateDays(
-						type,
-						PREV_AMOUNT_DAYS,
-						this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
-						this.getPrevMonth,
-						this.getPrevYear
-					)
-				}
+					return PREV_AMOUNT_DAYS > 0
+						? generateDays(
+								type,
+								PREV_AMOUNT_DAYS,
+								this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
+								this.getPrevMonth,
+								this.getPrevYear
+							)
+						: generateDays(
+								type,
+								this.dayWeeks,
+								this.getLastDayPrevMonth - (this.dayWeeks - 1),
+								this.getPrevMonth,
+								this.getPrevYear
+							)
+					}
 
 				case 'curr': {
 					return generateDays(
@@ -253,8 +271,8 @@ export default {
 				this.currDay = dt.getDate()
 				this.currMonth = dt.getMonth() + 1
 				this.currYear = dt.getFullYear()
-				this.$set(this.selectedDate, 'month', this.currMonth)
-				
+
+				this.setSelectedDate(this.currYear, this.currMonth, this.currDay)
 				this.createCalendar()
 			}
 		}
@@ -273,7 +291,7 @@ export default {
 						0px 0px 12px -3px rgba(26, 32, 44, .04);
 
 		&__v-date-picker-header {
-			margin-bottom: 20px;
+			margin: 10px 0 20px;
 		}
 	}
 	.v-date-picker-header {
@@ -287,11 +305,63 @@ export default {
 		justify-content: space-around;
 		align-content: space-around;
 	}
-	.v-date-btn {
+	.v-date-picker-btn {
 		cursor: pointer;
+		position: relative;
+		transition: .2s;
+
+		&:hover {
+			opacity: .6;
+			transform: scale(1.2);
+		}
 	}
-	.v-date-picker-title {
+	.v-date-picker-prev,
+	.v-date-picker-next {
+		&::before, &::after {
+			content: '';
+			width: 100%;
+			height: 3px;
+			border-radius: 2px;
+			background: #1f1f33;
+			position: absolute;
+		}
+	}
+	.v-date-picker-prev {
+		&::before {
+			top: 0;
+			transform: rotate(-45deg);
+		}
+		&::after {
+			bottom: 0;
+			left: 0;
+			transform: rotate(45deg);
+		}
+	}
+	.v-date-picker-next {
+		&::before {
+			top: 0;
+			transform: rotate(45deg);
+		}
+		&::after {
+			bottom: 0;
+			left: 0;
+			transform: rotate(-45deg);
+		}
+	}
+	.v-date-picker-box-title {
 		font-weight: 600;
 		color: #1f1f33;
+	}
+	.v-date-picker-month-title,
+	.v-date-picker-year-title {
+		transition: .2s;
+		cursor: pointer;
+	}
+	.v-date-picker-month-title,
+	.v-date-picker-year-title {
+
+		&:hover {
+			opacity: .6;
+		}
 	}
 </style>

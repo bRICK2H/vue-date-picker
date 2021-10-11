@@ -42,7 +42,7 @@ export default {
 	computed: {
 		setStyleCell() {
 			return {
-				flex: `0 0 calc((100% - ${this.cellSize}px) / 7)`,
+				flex: `0 1 calc((100% - ${this.cellSize}px) / 7)`,
 				height: `calc((100% - ${this.cellSize}px) / 7)`,
 				fontSize: `${(this.cellSize / 2.5)}px`,
 			}
