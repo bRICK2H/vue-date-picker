@@ -12,6 +12,11 @@
 					{{ item.day }}
 				</span>
 			</template> -->
+			<!-- <template v-slot="item">
+				<span style="color:pink">
+					{{ item.month }}
+				</span>
+			</template> -->
 		</VDatePicker>
 		
 	</div>

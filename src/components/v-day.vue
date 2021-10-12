@@ -1,7 +1,7 @@
 <template>
 	<div class="v-day-container"
 		:style="setStyleCell"
-		:class="[setClassCell, setClassActiveCell, setClassHoverOutsideCell]"
+		:class="[setClassCell, setClassActiveCell, setClassCurrendCell, setClassHoverOutsideCell]"
 		@click="selectDay"
 	>
 
@@ -22,6 +22,14 @@ export default {
 			type: Number,
 			required: true
 		},
+		month: {
+			type: Number,
+			required: true
+		},
+		year: {
+			type: Number,
+			required: true
+		},
 		type: {
 			type: String,
 			required: true
@@ -37,22 +45,37 @@ export default {
 		isActiveOutsideDays: {
 			type: Boolean,
 			required: true
-		}
+		},
+		initialDate: {
+			type: Object,
+			defaul: () => ({})
+		},
+		selectedDate: {
+			type: Object,
+			defaul: () => ({})
+		},
 	},
 	computed: {
 		setStyleCell() {
 			return {
 				flex: `0 1 calc((100% - ${this.cellSize}px) / 7)`,
 				height: `calc((100% - ${this.cellSize}px) / 7)`,
-				fontSize: `${(this.cellSize / 2.5)}px`,
+				fontSize: `${(this.cellSize / 3)}px`,
 			}
 		},
 		setClassCell() {
 			return `v-day-container--${this.type}`
 		},
 		setClassActiveCell() {
-			return this.selected
+			const { year, month, day } = this.selectedDate
+			return this.year === year && this.month === month && this.day === day
 				? `v-day-container--active`
+				: null
+		},
+		setClassCurrendCell() {
+			const { year, month, day } = this.initialDate
+			return this.year === year && this.month === month && this.day === day
+				? `v-day-container--current-dt`
 				: null
 		},
 		setClassHoverOutsideCell() {
@@ -75,7 +98,7 @@ export default {
 	.v-day-container {
 		position: relative;
 		border-radius: 50%;
-		border: 3px solid transparent;
+		border: 2.5px solid transparent;
 		transition: .2s;
 
 		&--prev,
@@ -87,20 +110,32 @@ export default {
 			background-color: #fff;
 
 			&:hover {
-				border: 3px solid rgba(31, 31, 51, .1);
+				border: 2px solid rgba(31, 31, 51, .1);
 			}
-		}
-		&--active {
-			font-weight: 700;
-			color: #fff;
-			background-color: #76768c;
 		}
 		&--hover-outside {
 			opacity: .4;
 			cursor: pointer;
 
 			&:hover {
-				border: 3px solid rgba(31, 31, 51, .3);
+				border: 2px solid rgba(31, 31, 51, .2);
+			}
+		}
+		&--active {
+			font-weight: 700;
+			color: #fff;
+			background-color: #76768c;
+
+			&:hover {
+				background: rgba(118, 118, 140, .8);
+				border: 2.5px solid transparent;
+			}
+		}
+		&--current-dt {
+			border: 2.5px solid rgba(31, 31, 51, .2);
+
+			&:hover {
+				border: 2.5px solid rgba(31, 31, 51, .1);
 			}
 		}
 	}
@@ -113,5 +148,6 @@ export default {
 	.v-day-item {
 		width: 100%;
 		height: 100%;
+		line-height: 0;
 	}
 </style>

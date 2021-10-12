@@ -2,13 +2,16 @@
 	<div class="v-date-picker-container wrapper__v-date-picker-container">
 
 		<div class="v-date-picker-header v-date-picker-container__v-date-picker-header">
-			<span class="v-date-picker-btn v-date-picker-prev"
-				:style="setStyleHeaderBtn"
-				@click="calculateMonth(-1)"
-			></span>
+			<div :style="setStyleHeaderBtnBox"
+				class="v-date-picker-btn-box"
+				@click="switchDate(-1, getCurrTemplate)"
+			>
+				<span class="v-date-picker-btn v-date-picker-prev" :style="setStyleHeaderBtn"></span>
+			</div>
 			<div :style="setStyleTitle" class="v-date-picker-box-title">
-				<span class="v-date-picker-month-title"
-					@click="openMonths"
+				<span v-show="template['days']"
+					class="v-date-picker-month-title"
+					@click="changeTemplate('months')"
 				>
 					{{ getCurrMonth }},
 				</span>
@@ -18,10 +21,12 @@
 					{{ currYear }}
 				</span>
 			</div>
-			<span class="v-date-picker-btn v-date-picker-next"
-				:style="setStyleHeaderBtn"
-				@click="calculateMonth(1)"
-			></span>
+			<div :style="setStyleHeaderBtnBox"
+				class="v-date-picker-btn-box"
+				@click="switchDate(1, getCurrTemplate)"
+			>
+				<span class="v-date-picker-btn v-date-picker-next" :style="setStyleHeaderBtn"></span>
+			</div>
 		</div>
 		
 		<div v-if="template['days']"
@@ -35,18 +40,19 @@
 			/>
 
 			<VDay
-				v-for="({ type, day, month, year, selected = false }, i) of calendarDays"
+				v-for="({ type, day, month, year }, i) of calendarDays"
 				:key="`${day}:${i}`"
 				:type="type"
 				:day="day"
-				:selected="selected"
+				:year="year"
+				:month="month"
+				:selectedDate="selectedDate"
 				:cellSize="cellSize"
+				:initialDate="initialDate"
 				:isActiveOutsideDays="isActiveOutsideDays"
 				@select-day="selectDay(i, type, day, month, year)"
 			>
-				<slot name="item"
-					v-bind="{ type, day, i }"
-				/>
+				<slot v-bind="{ type, day, i }" />
 			</VDay>
 		</div>
 
@@ -57,20 +63,19 @@
 				height: `${(this.cellSize * 7 + this.cellSize + 7) / 3 * 3}px`	
 			}"
 		>
-			<div v-for="(month, key) of months"
+			<VMonth v-for="(month, key, i) of months"
 				:key="key"
-				style="display: flex; justify-content: center; align-items: center; border-radius: 12px; cursor: pointer"
-				:style="{
-					width: `${(cellSize * 7) / 3}px`,
-					height: `${(cellSize * 7) / 4}px`,
-					background: currMonth === +key ? '#76768c' : '#fff',
-					color: currMonth === +key ? '#fff' : '#1f1f33',
-					fontWeight: currMonth === +key ? 700 : 400
-				}"
-				@click="currMonth = +key"
+				:cellSize="cellSize"
+				:month="month"
+				:monthId="+key"
+				:selectedDate="selectedDate"
+				:currMonth="currMonth"
+				:currYear="currYear"
+				:initialDate="initialDate"
+				@select-month="selectMonth(key)"
 			>
-				{{ month }}
-			</div>
+				<slot v-bind="{ month, key, i }" />
+			</VMonth>
 		</div>
 
 	</div>
@@ -79,13 +84,15 @@
 <script>
 import VDay from './v-day.vue'
 import VDayWeek from './v-day-week.vue'
+import VMonth from './v-month.vue'
 import { generateDays } from '../utility'
 
 export default {
 	name: 'VDatePicker',
 	components: {
 		VDay,
-		VDayWeek
+		VDayWeek,
+		VMonth
 	},
 	props: {
 		date: {
@@ -126,12 +133,13 @@ export default {
 			12: 'Декабрь'
 		},
 		template: {
-			days: false,
-			months: true,
+			days: true,
+			months: false,
 			years: false
 		},
 		calendarDays: [],
 		selectedDate: {},
+		initialDate: {},
 		amountDays: 42,
 		amountMonth: 12,
 		amountDayWeeks: 7,
@@ -173,6 +181,14 @@ export default {
 				? this.currYear + 1
 				: this.currYear
 		},
+		getCurrTemplate() {
+			return Object.entries(this.template)
+				.find(curr => {
+					const [, value] = curr
+
+					return value
+				})[0]
+		},
 
 		setStyleCalendarContainer() {
 			return {
@@ -181,40 +197,47 @@ export default {
 			}
 		},
 		setStyleTitle() {
-			return { fontSize: `${this.cellSize / 2}px` }
+			return { fontSize: `${this.cellSize / 2.25}px` }
 		},
 		setStyleHeaderBtn() {
-			return { width: `calc(${(this.cellSize / 2) - 3}px)`, height: `calc(${Math.ceil(this.cellSize / 3)}px )` }
+			return { width: `calc(${(this.cellSize / 2) - 3}px)` }
+		},
+		setStyleHeaderBtnBox() {
+			return { width: `${this.cellSize / 2}px`, height: `${this.cellSize / 1.5}px` }
 		},
 	},
 	methods: {
-		calculateMonth(count) {
-			this.currMonth += count
+		switchDate(count, stype) {
+			switch (stype) {
+				case 'days': {
+					this.currMonth += count
 
-			if (this.currMonth > this.amountMonth) {
-				this.currMonth = 1
-				this.currYear += 1
-			} else if (this.currMonth < 1) {
-				this.currMonth = this.amountMonth
-				this.currYear -= 1
+					if (this.currMonth > this.amountMonth) {
+						this.currMonth = 1
+						this.currYear += 1
+					} else if (this.currMonth < 1) {
+						this.currMonth = this.amountMonth
+						this.currYear -= 1
+					}
+
+					this.createCalendar()
+				}
+					
+					break;
+			
+				case 'months': {
+					this.currYear += count
+				}
+
+					break;
 			}
 
-			this.createCalendar()
 		},
 		createCalendar() {
-			const { year, month, day } = this.selectedDate
 			const PREV_DAYS = this.getDays('prev')
 			const CURR_DAYS = this.getDays('curr')
 			const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
 			this.calendarDays = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
-
-			const INDEX_DATE = this.calendarDays.findIndex(c => {
-				return c.month === month && c.year === year && c.day === day
-			})
-			
-			if (INDEX_DATE !== -1) {
-				this.$set(this.calendarDays[INDEX_DATE], 'selected', true)
-			}
 		},
 		selectDay(i, type, day, month, year) {
 			this.currDay = day
@@ -222,28 +245,20 @@ export default {
 			this.currYear = year
 			this.setSelectedDate(year, month, day)
 
-			if (type === 'curr') {
-				this.calendarDays.forEach(c => {
-					if (c.selected !== undefined) {
-						this.$delete(c, 'selected')
-					}
-				})
-	
-				this.$set(this.calendarDays[i], 'selected', true)
-
-			} else if (this.isActiveOutsideDays) {
+			if (type !== 'curr' && this.isActiveOutsideDays) {
 				this.createCalendar()
 			}
 
 			this.$emit('input', new Date(`${year}-${month}-${day}`))
 		},
+		selectMonth(month) {
+			this.changeTemplate('days')
+			this.switchDate(+month - this.currMonth, 'days')
+		},
 		setSelectedDate(y, m, d) {
 			this.$set(this.selectedDate, 'year', y)
 			this.$set(this.selectedDate, 'month', m)
 			this.$set(this.selectedDate, 'day', d)
-		},
-		openMonths() {
-			console.log('openMonths')
 		},
 		openYears() {
 			console.log('openYears')
@@ -290,6 +305,15 @@ export default {
 					)
 				}
 			}
+		},
+		changeTemplate(type) {
+			for(const curr in this.template) {
+				this.template[curr] = false
+
+				if (curr === type) {
+					this.template[type] = true
+				}
+			}
 		}
 	},
 	watch: {
@@ -302,7 +326,9 @@ export default {
 				this.currYear = dt.getFullYear()
 
 				this.setSelectedDate(this.currYear, this.currMonth, this.currDay)
+				this.initialDate = Object.freeze({ ...this.selectedDate })
 				this.createCalendar()
+
 			}
 		}
 	}
@@ -334,46 +360,60 @@ export default {
 		justify-content: space-around;
 		align-content: space-around;
 	}
-	.v-date-picker-btn {
-		cursor: pointer;
-		position: relative;
-		transition: .2s;
+	.v-date-picker-btn-box {
+		display: flex;
+		justify-content: center;
+		align-items: center;
 
-		&:hover {
+		&:hover .v-date-picker-btn {
 			opacity: .6;
 			transform: scale(1.2);
 		}
 	}
+	.v-date-picker-btn {
+		cursor: pointer;
+		position: relative;
+		transition: .2s;
+	}
 	.v-date-picker-prev,
 	.v-date-picker-next {
+		width: 100%;
+		height: 3px;
+
 		&::before, &::after {
 			content: '';
 			width: 100%;
 			height: 3px;
-			border-radius: 2px;
+			border-radius: 3px;
 			background: #1f1f33;
 			position: absolute;
 		}
 	}
 	.v-date-picker-prev {
 		&::before {
-			top: 0;
+			top: 1px;
+			left: 0;
+			transform-origin: left;
 			transform: rotate(-45deg);
 		}
 		&::after {
-			bottom: 0;
+			bottom: 1px;
 			left: 0;
+			transform-origin: left;
 			transform: rotate(45deg);
 		}
 	}
 	.v-date-picker-next {
 		&::before {
-			top: 0;
+			top: 1px;
+			right: 0;
+			transform-origin: right;
 			transform: rotate(45deg);
 		}
 		&::after {
-			bottom: 0;
-			left: 0;
+			bottom: 1px;
+			right: 0;
+			transform-origin: right;
 			transform: rotate(-45deg);
 		}
 	}
