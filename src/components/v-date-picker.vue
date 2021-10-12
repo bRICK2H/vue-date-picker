@@ -40,19 +40,26 @@
 			/>
 
 			<VDay
-				v-for="({ type, day, month, year }, i) of calendarDays"
+				v-for="({
+					type,
+					year,
+					month,
+					day,
+					dt_selected = false,
+					dt_current = false
+				}, i) of calendarDays"
 				:key="`${day}:${i}`"
-				:type="type"
-				:day="day"
 				:year="year"
 				:month="month"
-				:selectedDate="selectedDate"
+				:day="day"
+				:type="type"
 				:cellSize="cellSize"
-				:initialDate="initialDate"
-				:isActiveOutsideDays="isActiveOutsideDays"
+				:dt_selected="dt_selected"
+				:dt_current="dt_current"
+				:dt_outside_active="dt_outside_active"
 				@select-day="selectDay(i, type, day, month, year)"
 			>
-				<slot v-bind="{ type, day, i }" />
+				<slot v-bind="{ type, day, month, year, dt_selected, dt_current }" />
 			</VDay>
 		</div>
 
@@ -95,15 +102,12 @@ export default {
 		VMonth
 	},
 	props: {
-		date: {
-			type: Date,
-			default: new Date
-		},
+		value: null,
 		cellSize: {
 			type: Number,
 			default: 36
 		},
-		isActiveOutsideDays: {
+		dt_outside_active: {
 			type: Boolean,
 			default: false
 		}
@@ -132,20 +136,24 @@ export default {
 			11: 'Ноябрь',
 			12: 'Декабрь'
 		},
+		
 		template: {
 			days: true,
 			months: false,
 			years: false
 		},
-		calendarDays: [],
-		selectedDate: {},
+		
 		initialDate: {},
+		selectedDate: {},
+		calendarDays: [],
+
 		amountDays: 42,
 		amountMonth: 12,
 		amountDayWeeks: 7,
-		currDay: null,
-		currMonth: null,
+		
 		currYear: null,
+		currMonth: null,
+		currDay: null,
 	}),
 	computed: {
 		getCurrMonth() {
@@ -234,10 +242,22 @@ export default {
 
 		},
 		createCalendar() {
+			const { year: i_year, month: i_month, day: i_day } = this.initialDate
+			const { year: s_year, month: s_month, day: s_day } = this.selectedDate
 			const PREV_DAYS = this.getDays('prev')
 			const CURR_DAYS = this.getDays('curr')
 			const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
 			this.calendarDays = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
+
+			this.calendarDays.forEach((c, ci) => {
+				if (c.month === s_month && c.year === s_year && c.day === s_day) {
+					this.$set(this.calendarDays[ci], 'dt_selected', true)
+				}
+				
+				if (c.month === i_month && c.year === i_year && c.day === i_day) {
+					this.$set(this.calendarDays[ci], 'dt_current', true)
+				}
+			})
 		},
 		selectDay(i, type, day, month, year) {
 			this.currDay = day
@@ -245,7 +265,13 @@ export default {
 			this.currYear = year
 			this.setSelectedDate(year, month, day)
 
-			if (type !== 'curr' && this.isActiveOutsideDays) {
+			if (type === 'curr') {
+				this.calendarDays.forEach((c, ci) => {
+					this.$set(this.calendarDays[ci], 'dt_selected', false)
+				})
+	
+				this.$set(this.calendarDays[i], 'dt_selected', true)
+			} else if (this.dt_outside_active) {
 				this.createCalendar()
 			}
 
@@ -317,18 +343,24 @@ export default {
 		}
 	},
 	watch: {
-		date: {
+		value: {
 			immediate: true,
-			handler(dt) {
-				console.log('watch: dt', dt)
+			handler(dt_value) {
+				// Далее добавить условие на массив, если массив то выводим 2 даты, так же в зависимости от мода
+				const dt = !dt_value || !(dt_value instanceof Date)
+					? new Date()
+					: dt_value 
+
 				this.currDay = dt.getDate()
 				this.currMonth = dt.getMonth() + 1
 				this.currYear = dt.getFullYear()
 
-				this.setSelectedDate(this.currYear, this.currMonth, this.currDay)
-				this.initialDate = Object.freeze({ ...this.selectedDate })
-				this.createCalendar()
+				if (dt_value && dt_value instanceof Date) {
+					this.setSelectedDate(this.currYear, this.currMonth, this.currDay)
+				}
 
+				this.initialDate = { year: this.currYear, month: this.currMonth, day: this.currDay, }
+				this.createCalendar()
 			}
 		}
 	}
@@ -420,6 +452,11 @@ export default {
 	.v-date-picker-box-title {
 		font-weight: 600;
 		color: #1f1f33;
+	}
+	.v-date-picker-year-title {
+		display: inline-block;
+		min-width: 50px;
+		text-align: center;
 	}
 	.v-date-picker-month-title,
 	.v-date-picker-year-title {

@@ -2,16 +2,17 @@
 	<div class="wrapper">
 
 		<VDatePicker
-			:date="new Date()"
-			:cellSize="50"
-			:isActiveOutsideDays="true"
+			:value="new Date()"
+			:cellSize="36"
+			:dt_outside_active="true"
 			@input="input"
 		>
-			<!-- <template v-slot:item="item">
-				<span style="color:pink">
+			<!-- <template v-slot="item">
+				<span style="color:pink;font-size: 12px">
 					{{ item.day }}
 				</span>
 			</template> -->
+
 			<!-- <template v-slot="item">
 				<span style="color:pink">
 					{{ item.month }}

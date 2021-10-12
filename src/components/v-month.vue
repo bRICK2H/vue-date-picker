@@ -1,7 +1,7 @@
 <template>
 	<div class="v-month-container"
-		:class="[setClassActiveCell, setClassCurrentCell]"
-		:style="setStyleCell"
+		:class="[setClassSelectedMonth, setClassCurrentMonth]"
+		:style="setStyleMonth"
 		@click="$emit('select-month')"
 	>
 		
@@ -48,23 +48,23 @@ export default {
 		},
 	},
 	computed: {
-		setStyleCell() {
+		setStyleMonth() {
 			return {
 				width: `${(this.cellSize * 7) / 3}px`,
 				height: `${(this.cellSize * 7) / 4}px`,
 				fontSize: `${this.cellSize / 3}px`
 			}
 		},
-		setClassActiveCell() {
+		setClassSelectedMonth() {
 			const { year } = this.selectedDate
 			return year === this.currYear && this.currMonth === this.monthId
-				? 'v-month-container--active'
+				? 'v-month-container--mn_selected'
 				: null
 		},
-		setClassCurrentCell() {
+		setClassCurrentMonth() {
 			const { year, month } = this.initialDate
 			return year === this.currYear && month === this.monthId
-				? 'v-month-container--current'
+				? 'v-month-container--mn_current'
 				: null
 		}
 	}
@@ -87,7 +87,7 @@ export default {
 		&:hover {
 			border: 2px solid rgba(31, 31, 51, .1);
 		}
-		&--active {
+		&--mn_selected {
 			background: #76768c;
 			color: #fff;
 			font-weight: 700;
@@ -96,7 +96,7 @@ export default {
 				background: rgba(118, 118, 140, .8);
 			}
 		}
-		&--current {
+		&--mn_current {
 			border: 2.5px solid rgba(31, 31, 51, .2);
 
 			&:hover {

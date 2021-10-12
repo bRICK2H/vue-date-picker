@@ -1,7 +1,7 @@
 <template>
 	<div class="v-day-container"
-		:style="setStyleCell"
-		:class="[setClassCell, setClassActiveCell, setClassCurrendCell, setClassHoverOutsideCell]"
+		:style="setStyleDay"
+		:class="[setClassDay, setClassSelectedDay, setClassCurrentDay, setClassOutsideActiveDay]"
 		@click="selectDay"
 	>
 
@@ -18,7 +18,7 @@
 export default {
 	name: 'VDay',
 	props: {
-		day: {
+		year: {
 			type: Number,
 			required: true
 		},
@@ -26,7 +26,7 @@ export default {
 			type: Number,
 			required: true
 		},
-		year: {
+		day: {
 			type: Number,
 			required: true
 		},
@@ -34,59 +34,53 @@ export default {
 			type: String,
 			required: true
 		},
-		selected: {
-			type: Boolean,
-			default: false
-		},
 		cellSize: {
 			type: Number,
 			required: true
 		},
-		isActiveOutsideDays: {
+		dt_selected: {
 			type: Boolean,
 			required: true
 		},
-		initialDate: {
-			type: Object,
-			defaul: () => ({})
+		dt_current: {
+			type: Boolean,
+			required: true
 		},
-		selectedDate: {
-			type: Object,
-			defaul: () => ({})
-		},
+		dt_outside_active: {
+			type: Boolean,
+			required: true
+		}
 	},
 	computed: {
-		setStyleCell() {
+		setStyleDay() {
 			return {
 				flex: `0 1 calc((100% - ${this.cellSize}px) / 7)`,
 				height: `calc((100% - ${this.cellSize}px) / 7)`,
 				fontSize: `${(this.cellSize / 3)}px`,
 			}
 		},
-		setClassCell() {
+		setClassDay() {
 			return `v-day-container--${this.type}`
 		},
-		setClassActiveCell() {
-			const { year, month, day } = this.selectedDate
-			return this.year === year && this.month === month && this.day === day
-				? `v-day-container--active`
+		setClassSelectedDay() {
+			return this.dt_selected
+				? `v-day-container--dt_selected`
 				: null
 		},
-		setClassCurrendCell() {
-			const { year, month, day } = this.initialDate
-			return this.year === year && this.month === month && this.day === day
-				? `v-day-container--current-dt`
+		setClassCurrentDay() {
+			return this.dt_current
+				? `v-day-container--dt_current`
 				: null
 		},
-		setClassHoverOutsideCell() {
-			return this.type !== 'curr' && this.isActiveOutsideDays
-				? `v-day-container--hover-outside`
+		setClassOutsideActiveDay() {
+			return this.type !== 'curr' && this.dt_outside_active
+				? `v-day-container--dt_outside_active`
 				: null
 		}
 	},
 	methods: {
 		selectDay() {
-			if (this.type === 'curr' || this.isActiveOutsideDays) {
+			if (this.type === 'curr' || this.dt_outside_active) {
 				this.$emit('select-day')
 			}
 		}
@@ -113,7 +107,7 @@ export default {
 				border: 2px solid rgba(31, 31, 51, .1);
 			}
 		}
-		&--hover-outside {
+		&--dt_outside_active {
 			opacity: .4;
 			cursor: pointer;
 
@@ -121,7 +115,7 @@ export default {
 				border: 2px solid rgba(31, 31, 51, .2);
 			}
 		}
-		&--active {
+		&--dt_selected {
 			font-weight: 700;
 			color: #fff;
 			background-color: #76768c;
@@ -131,7 +125,7 @@ export default {
 				border: 2.5px solid transparent;
 			}
 		}
-		&--current-dt {
+		&--dt_current {
 			border: 2.5px solid rgba(31, 31, 51, .2);
 
 			&:hover {

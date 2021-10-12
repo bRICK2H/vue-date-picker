@@ -1,6 +1,6 @@
 <template>
 	<span class="v-day-week"
-		:style="setStyleCell"
+		:style="setStyleDayWeek"
 	>
 		{{ dayWeek }}
 	</span>
@@ -20,7 +20,7 @@ export default {
 		},
 	},
 	computed: {
-		setStyleCell() {
+		setStyleDayWeek() {
 			return {
 				fontSize: `${(this.cellSize / 3)}px`,
 				flex: `0 0 calc((100% - ${this.cellSize}px) / 7)`,
