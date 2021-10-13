@@ -29,6 +29,7 @@
 			</div>
 		</div>
 		
+		<!-- DAYS TEMPLATE -->
 		<div v-if="template['days']"
 			class="v-date-picker-body"
 			:style="setStyleCalendarContainer"
@@ -63,6 +64,7 @@
 			</VDay>
 		</div>
 
+		<!-- MONTH TEMPLATE -->
 		<div v-if="template['months']"
 			style="display:flex; flex-wrap: wrap; justify-content: space-around; align-items: center;"
 			:style="{
@@ -79,10 +81,15 @@
 				:currMonth="currMonth"
 				:currYear="currYear"
 				:initialDate="initialDate"
-				@select-month="selectMonth(key)"
+				@select-month="selectMonths(key)"
 			>
 				<slot v-bind="{ month, key, i }" />
 			</VMonth>
+		</div>
+
+		<!-- YEARS TEMPLATE -->
+		<div v-if="template['years']">
+			<VYear />
 		</div>
 
 	</div>
@@ -92,6 +99,7 @@
 import VDay from './v-day.vue'
 import VDayWeek from './v-day-week.vue'
 import VMonth from './v-month.vue'
+import VYear from './v-year.vue'
 import { generateDays } from '../utility'
 
 export default {
@@ -99,7 +107,8 @@ export default {
 	components: {
 		VDay,
 		VDayWeek,
-		VMonth
+		VMonth,
+		VYear
 	},
 	props: {
 		value: null,
@@ -228,7 +237,7 @@ export default {
 						this.currYear -= 1
 					}
 
-					this.createCalendar()
+					this.createCalendarDays()
 				}
 					
 					break;
@@ -241,7 +250,7 @@ export default {
 			}
 
 		},
-		createCalendar() {
+		createCalendarDays() {
 			const { year: i_year, month: i_month, day: i_day } = this.initialDate
 			const { year: s_year, month: s_month, day: s_day } = this.selectedDate
 			const PREV_DAYS = this.getDays('prev')
@@ -272,12 +281,12 @@ export default {
 	
 				this.$set(this.calendarDays[i], 'dt_selected', true)
 			} else if (this.dt_outside_active) {
-				this.createCalendar()
+				this.createCalendarDays()
 			}
 
 			this.$emit('input', new Date(`${year}-${month}-${day}`))
 		},
-		selectMonth(month) {
+		selectMonths(month) {
 			this.changeTemplate('days')
 			this.switchDate(+month - this.currMonth, 'days')
 		},
@@ -287,6 +296,8 @@ export default {
 			this.$set(this.selectedDate, 'day', d)
 		},
 		openYears() {
+			console.log(this.currYear)
+			// this.changeTemplate('years')
 			console.log('openYears')
 		},
 		getDays(type, prevDays = 0, currDays = 0) {
@@ -360,7 +371,7 @@ export default {
 				}
 
 				this.initialDate = { year: this.currYear, month: this.currMonth, day: this.currDay, }
-				this.createCalendar()
+				this.createCalendarDays()
 			}
 		}
 	}
