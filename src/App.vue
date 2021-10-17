@@ -3,7 +3,7 @@
 
 		<VDatePicker
 			:value="new Date()"
-			:cellSize="36"
+			:cellSize="50"
 			:dt_outside_active="true"
 			@input="input"
 		>
@@ -14,8 +14,8 @@
 			</template> -->
 
 			<!-- <template v-slot="item">
-				<span style="color:pink">
-					{{ item.month }}
+				<span style="color:pink;">
+					{{ item.name }}
 				</span>
 			</template> -->
 		</VDatePicker>
