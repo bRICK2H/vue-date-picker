@@ -6,7 +6,7 @@
 			setClassCurrentMonth,
 			setClassSwitchedMonth,
 		]"
-		@click="$emit('select-month')"
+		@click="$emit('switch-month')"
 	>
 		
 		<slot>

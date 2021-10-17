@@ -31,7 +31,18 @@
 		</div>
 		
 		<!-- DAYS TEMPLATE -->
-		<div v-if="template['days']"
+
+		<VDays
+			:daysWeek="daysWeek"
+			:size="cellSize"
+			:init="initialDate"
+			:selected="selectedDate"
+			:dt_outside_active="dt_outside_active"
+		>
+
+		</VDays>
+		
+		<!-- <div v-if="template['days']"
 			class="v-date-picker-body"
 			:style="setStyleCalendarContainer"
 		>
@@ -63,7 +74,7 @@
 			>
 				<slot v-bind="{ type, day, month, year, dt_selected, dt_current }" />
 			</VDay>
-		</div>
+		</div> -->
 
 		<!-- MONTH TEMPLATE -->
 		<VMonths v-if="template['months']"
@@ -71,7 +82,7 @@
 			:size="cellSize"
 			:init="initialDate"
 			:switch="{ year: currYear, month: currMonth }"
-			@select-month="selectMonth"
+			@switch-month="switchMonth"
 		>
 			<template v-slot="month">
 				<slot v-bind="month"/>
@@ -89,17 +100,20 @@
 </template>
 
 <script>
-import VDay from './v-day.vue'
-import VDayWeek from './v-day-week.vue'
+// import VDay from './v-day.vue'
+// import VDayWeek from './v-day-week.vue'
+
+import VDays from './days/v-days'
 import VMonths from './month/v-months'
 import VYear from './v-year.vue'
-import { generateDays } from '../utility'
+// import { generateDays } from '../utility'
 
 export default {
 	name: 'VDatePicker',
 	components: {
-		VDay,
-		VDayWeek,
+		// VDay,
+		// VDayWeek,
+		VDays,
 		VMonths,
 		VYear
 	},
@@ -148,12 +162,12 @@ export default {
 		initialDate: {},
 		selectedDate: {},
 		
-		calendarDays: [],
+		// calendarDays: [],
 		calendarYears: [],
 
-		amountDays: 42,
+		// amountDays: 42,
 		amountMonth: 12,
-		amountDayWeeks: 7,
+		// amountDayWeeks: 7,
 		
 		currYear: null,
 		currMonth: null,
@@ -163,36 +177,36 @@ export default {
 		getCurrMonth() {
 			return this.months[this.currMonth]
 		},
-		getCurrFirstDayWeekId() {
-			const FIRST_DAY = new Date(`${this.currYear}-${this.currMonth}-1`).getDay()
-			return FIRST_DAY === 0 ? this.amountDayWeeks : FIRST_DAY
-		},
-		getCurrLastDayMonth() {
-			return new Date(new Date(`${this.currYear}-${this.getNextMonth}-1`) - 1).getDate()
-		},
-		getPrevMonth() {
-			return this.currMonth === 1
-				? this.amountMonth
-				: this.currMonth - 1
-		},
-		getLastDayPrevMonth() {
-			return new Date(new Date(`${this.currYear}-${this.currMonth}-1`) - 1).getDate()
-		},
-		getPrevYear() {
-			return this.currMonth === 1
-				? this.currYear - 1
-				: this.currYear
-		},
-		getNextMonth() {
-			return this.currMonth === this.amountMonth
-				? 1
-				: this.currMonth + 1
-		},
-		getNextYear() {
-			return this.currMonth === this.amountMonth
-				? this.currYear + 1
-				: this.currYear
-		},
+		// getCurrFirstDayWeekId() {
+		// 	const FIRST_DAY = new Date(`${this.currYear}-${this.currMonth}-1`).getDay()
+		// 	return FIRST_DAY === 0 ? this.amountDayWeeks : FIRST_DAY
+		// },
+		// getCurrLastDayMonth() {
+		// 	return new Date(new Date(`${this.currYear}-${this.getNextMonth}-1`) - 1).getDate()
+		// },
+		// getPrevMonth() {
+		// 	return this.currMonth === 1
+		// 		? this.amountMonth
+		// 		: this.currMonth - 1
+		// },
+		// getLastDayPrevMonth() {
+		// 	return new Date(new Date(`${this.currYear}-${this.currMonth}-1`) - 1).getDate()
+		// },
+		// getPrevYear() {
+		// 	return this.currMonth === 1
+		// 		? this.currYear - 1
+		// 		: this.currYear
+		// },
+		// getNextMonth() {
+		// 	return this.currMonth === this.amountMonth
+		// 		? 1
+		// 		: this.currMonth + 1
+		// },
+		// getNextYear() {
+		// 	return this.currMonth === this.amountMonth
+		// 		? this.currYear + 1
+		// 		: this.currYear
+		// },
 		getCurrTemplate() {
 			return Object.entries(this.template)
 				.find(curr => {
@@ -202,12 +216,12 @@ export default {
 				})[0]
 		},
 
-		setStyleCalendarContainer() {
-			return {
-				width: `${(this.cellSize * 7) + this.cellSize + 7}px`,
-				height: `${(this.cellSize * 7) + this.cellSize + 7}px`,
-			}
-		},
+		// setStyleCalendarContainer() {
+		// 	return {
+		// 		width: `${(this.cellSize * 7) + this.cellSize + 7}px`,
+		// 		height: `${(this.cellSize * 7) + this.cellSize + 7}px`,
+		// 	}
+		// },
 		setStyleTitle() {
 			return { fontSize: `${this.cellSize / 2.25}px` }
 		},
@@ -232,7 +246,7 @@ export default {
 						this.currYear -= 1
 					}
 
-					this.createCalendarDays()
+					// this.createCalendarDays()
 				}
 					
 					break;
@@ -246,24 +260,24 @@ export default {
 			}
 
 		},
-		createCalendarDays() {
-			const { year: i_year, month: i_month, day: i_day } = this.initialDate
-			const { year: s_year, month: s_month, day: s_day } = this.selectedDate
-			const PREV_DAYS = this.getDays('prev')
-			const CURR_DAYS = this.getDays('curr')
-			const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
-			this.calendarDays = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
+		// createCalendarDays() {
+		// 	const { year: i_year, month: i_month, day: i_day } = this.initialDate
+		// 	const { year: s_year, month: s_month, day: s_day } = this.selectedDate
+		// 	const PREV_DAYS = this.getDays('prev')
+		// 	const CURR_DAYS = this.getDays('curr')
+		// 	const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
+		// 	this.calendarDays = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
 
-			this.calendarDays.forEach((c, ci) => {
-				if (c.month === s_month && c.year === s_year && c.day === s_day) {
-					this.$set(this.calendarDays[ci], 'dt_selected', true)
-				}
+		// 	this.calendarDays.forEach((c, ci) => {
+		// 		if (c.month === s_month && c.year === s_year && c.day === s_day) {
+		// 			this.$set(this.calendarDays[ci], 'dt_selected', true)
+		// 		}
 				
-				if (c.month === i_month && c.year === i_year && c.day === i_day) {
-					this.$set(this.calendarDays[ci], 'dt_current', true)
-				}
-			})
-		},
+		// 		if (c.month === i_month && c.year === i_year && c.day === i_day) {
+		// 			this.$set(this.calendarDays[ci], 'dt_current', true)
+		// 		}
+		// 	})
+		// },
 		selectDay(i, type, day, month, year) {
 			this.currDay = day
 			this.currMonth = month
@@ -277,12 +291,12 @@ export default {
 	
 				this.$set(this.calendarDays[i], 'dt_selected', true)
 			} else if (this.dt_outside_active) {
-				this.createCalendarDays()
+				// this.createCalendarDays()
 			}
 
 			this.$emit('input', new Date(`${year}-${month}-${day}`))
 		},
-		selectMonth({ id, year }) {
+		switchMonth({ id, year }) {
 			this.changeTemplate('days')
 			console.log({id, year})
 			this.currYear = year
@@ -303,49 +317,49 @@ export default {
 			this.changeTemplate('years')
 			console.log('openYears')
 		},
-		getDays(type, prevDays = 0, currDays = 0) {
-			switch (type) {
-				case 'prev': {
-					const PREV_AMOUNT_DAYS = this.getCurrFirstDayWeekId - 1
+		// getDays(type, prevDays = 0, currDays = 0) {
+		// 	switch (type) {
+		// 		case 'prev': {
+		// 			const PREV_AMOUNT_DAYS = this.getCurrFirstDayWeekId - 1
 
-					return PREV_AMOUNT_DAYS > 0
-						? generateDays(
-								type,
-								PREV_AMOUNT_DAYS,
-								this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
-								this.getPrevMonth,
-								this.getPrevYear
-							)
-						: generateDays(
-								type,
-								this.amountDayWeeks,
-								this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
-								this.getPrevMonth,
-								this.getPrevYear
-							)
-					}
+		// 			return PREV_AMOUNT_DAYS > 0
+		// 				? generateDays(
+		// 						type,
+		// 						PREV_AMOUNT_DAYS,
+		// 						this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
+		// 						this.getPrevMonth,
+		// 						this.getPrevYear
+		// 					)
+		// 				: generateDays(
+		// 						type,
+		// 						this.amountDayWeeks,
+		// 						this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
+		// 						this.getPrevMonth,
+		// 						this.getPrevYear
+		// 					)
+		// 			}
 
-				case 'curr': {
-					return generateDays(
-						type,
-						this.getCurrLastDayMonth,
-						1,
-						this.currMonth,
-						this.currYear
-					)
-				}
+		// 		case 'curr': {
+		// 			return generateDays(
+		// 				type,
+		// 				this.getCurrLastDayMonth,
+		// 				1,
+		// 				this.currMonth,
+		// 				this.currYear
+		// 			)
+		// 		}
 
-				case 'next': {
-					return generateDays(
-						type,
-						this.amountDays - (prevDays.length + currDays.length),
-						1,
-						this.getNextMonth,
-						this.getNextYear
-					)
-				}
-			}
-		},
+		// 		case 'next': {
+		// 			return generateDays(
+		// 				type,
+		// 				this.amountDays - (prevDays.length + currDays.length),
+		// 				1,
+		// 				this.getNextMonth,
+		// 				this.getNextYear
+		// 			)
+		// 		}
+		// 	}
+		// },
 		changeTemplate(type) {
 			for(const curr in this.template) {
 				this.template[curr] = curr === type
@@ -370,7 +384,7 @@ export default {
 				}
 
 				this.initialDate = { year: this.currYear, month: this.currMonth, day: this.currDay, }
-				this.createCalendarDays()
+				// this.createCalendarDays()
 			}
 		}
 	}
@@ -396,12 +410,12 @@ export default {
 		justify-content: space-between;
 		align-items: center;
 	}
-	.v-date-picker-body {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-around;
-		align-content: space-around;
-	}
+	// .v-date-picker-body {
+	// 	display: flex;
+	// 	flex-wrap: wrap;
+	// 	justify-content: space-around;
+	// 	align-content: space-around;
+	// }
 	.v-date-picker-btn-box {
 		display: flex;
 		justify-content: center;

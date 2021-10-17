@@ -7,7 +7,7 @@
 			:key="month.name"
 			:month="month"
 			:size="size"
-			@select-month="$emit('select-month', { id: month.id, year: month.year })"
+			@switch-month="$emit('switch-month', {id: month.id, year: month.year })"
 		>
 			<slot v-bind="month" />
 		</VMonthItem>
