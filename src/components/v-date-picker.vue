@@ -1,6 +1,7 @@
 <template>
 	<div class="v-date-picker-container wrapper__v-date-picker-container">
 
+		<!-- HEADER -->
 		<div class="v-date-picker-header v-date-picker-container__v-date-picker-header">
 			<div :style="setStyleHeaderBtnBox"
 				class="v-date-picker-btn-box"
@@ -65,31 +66,23 @@
 		</div>
 
 		<!-- MONTH TEMPLATE -->
-		<div v-if="template['months']"
-			style="display:flex; flex-wrap: wrap; justify-content: space-around; align-items: center;"
-			:style="{
-				width: `${((cellSize * 7 + this.cellSize + 7) / 3) * 3}px`,
-				height: `${(this.cellSize * 7 + this.cellSize + 7) / 3 * 3}px`	
-			}"
+		<VMonths v-if="template['months']"
+			:months="months"
+			:size="cellSize"
+			:init="initialDate"
+			:switch="{ year: currYear, month: currMonth }"
+			@select-month="selectMonth"
 		>
-			<VMonth v-for="(month, key, i) of months"
-				:key="key"
-				:cellSize="cellSize"
-				:month="month"
-				:monthId="+key"
-				:selectedDate="selectedDate"
-				:currMonth="currMonth"
-				:currYear="currYear"
-				:initialDate="initialDate"
-				@select-month="selectMonths(key)"
-			>
-				<slot v-bind="{ month, key, i }" />
-			</VMonth>
-		</div>
+			<template v-slot="month">
+				<slot v-bind="month"/>
+			</template>
+		</VMonths>
 
 		<!-- YEARS TEMPLATE -->
 		<div v-if="template['years']">
-			<VYear />
+			<VYear
+				@select-year="selecteYear"
+			/>
 		</div>
 
 	</div>
@@ -98,7 +91,7 @@
 <script>
 import VDay from './v-day.vue'
 import VDayWeek from './v-day-week.vue'
-import VMonth from './v-month.vue'
+import VMonths from './month/v-months'
 import VYear from './v-year.vue'
 import { generateDays } from '../utility'
 
@@ -107,7 +100,7 @@ export default {
 	components: {
 		VDay,
 		VDayWeek,
-		VMonth,
+		VMonths,
 		VYear
 	},
 	props: {
@@ -154,7 +147,9 @@ export default {
 		
 		initialDate: {},
 		selectedDate: {},
+		
 		calendarDays: [],
+		calendarYears: [],
 
 		amountDays: 42,
 		amountMonth: 12,
@@ -242,6 +237,7 @@ export default {
 					
 					break;
 			
+				case 'years':
 				case 'months': {
 					this.currYear += count
 				}
@@ -286,9 +282,16 @@ export default {
 
 			this.$emit('input', new Date(`${year}-${month}-${day}`))
 		},
-		selectMonths(month) {
+		selectMonth({ id, year }) {
 			this.changeTemplate('days')
-			this.switchDate(+month - this.currMonth, 'days')
+			console.log({id, year})
+			this.currYear = year
+			this.currMonth = id
+			// this.switchDate(+id - this.currMonth, 'days')
+			// this.switchDate(+month - this.currMonth, 'days')
+		},
+		selecteYear() {
+			console.log('selecteYear')
 		},
 		setSelectedDate(y, m, d) {
 			this.$set(this.selectedDate, 'year', y)
@@ -297,7 +300,7 @@ export default {
 		},
 		openYears() {
 			console.log(this.currYear)
-			// this.changeTemplate('years')
+			this.changeTemplate('years')
 			console.log('openYears')
 		},
 		getDays(type, prevDays = 0, currDays = 0) {
@@ -345,11 +348,7 @@ export default {
 		},
 		changeTemplate(type) {
 			for(const curr in this.template) {
-				this.template[curr] = false
-
-				if (curr === type) {
-					this.template[type] = true
-				}
+				this.template[curr] = curr === type
 			}
 		}
 	},
@@ -407,6 +406,7 @@ export default {
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		cursor: pointer;
 
 		&:hover .v-date-picker-btn {
 			opacity: .6;
@@ -414,7 +414,7 @@ export default {
 		}
 	}
 	.v-date-picker-btn {
-		cursor: pointer;
+		
 		position: relative;
 		transition: .2s;
 	}

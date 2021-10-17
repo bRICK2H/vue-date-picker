@@ -92,7 +92,7 @@ export default {
 	.v-day-container {
 		position: relative;
 		border-radius: 50%;
-		border: 2.5px solid transparent;
+		border: 2px solid transparent;
 		transition: .2s;
 
 		&--prev,
@@ -122,14 +122,15 @@ export default {
 
 			&:hover {
 				background: rgba(118, 118, 140, .8);
-				border: 2.5px solid transparent;
+				border: 2px solid transparent;
 			}
 		}
 		&--dt_current {
-			border: 2.5px solid rgba(31, 31, 51, .2);
+			font-weight: 600;
+			border: 2px solid rgba(31, 31, 51, .2);
 
 			&:hover {
-				border: 2.5px solid rgba(31, 31, 51, .1);
+				border: 2px solid rgba(31, 31, 51, .1);
 			}
 		}
 	}
@@ -142,6 +143,5 @@ export default {
 	.v-day-item {
 		width: 100%;
 		height: 100%;
-		line-height: 0;
 	}
 </style>
