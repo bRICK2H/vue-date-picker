@@ -19,7 +19,7 @@
 				<span class="v-date-picker-year-title"
 					@click="openYears"
 				>
-					{{ currYear }}
+					{{ switchedDate.year }}
 				</span>
 			</div>
 			<div :style="setStyleHeaderBtnBox"
@@ -37,7 +37,9 @@
 			:size="cellSize"
 			:init="initialDate"
 			:selected="selectedDate"
-			:dt_outside_active="dt_outside_active"
+			:switched="switchedDate"
+			:is_outside_active="isOutsideActive"
+			@select-day="selectDay"
 		>
 
 		</VDays>
@@ -69,7 +71,7 @@
 				:cellSize="cellSize"
 				:dt_selected="dt_selected"
 				:dt_current="dt_current"
-				:dt_outside_active="dt_outside_active"
+				:isOutsideActive="isOutsideActive"
 				@select-day="selectDay(i, type, day, month, year)"
 			>
 				<slot v-bind="{ type, day, month, year, dt_selected, dt_current }" />
@@ -123,7 +125,7 @@ export default {
 			type: Number,
 			default: 36
 		},
-		dt_outside_active: {
+		isOutsideActive: {
 			type: Boolean,
 			default: false
 		}
@@ -161,6 +163,7 @@ export default {
 		
 		initialDate: {},
 		selectedDate: {},
+		switchedDate: {},
 		
 		// calendarDays: [],
 		calendarYears: [],
@@ -175,7 +178,8 @@ export default {
 	}),
 	computed: {
 		getCurrMonth() {
-			return this.months[this.currMonth]
+			const { month } = this.switchedDate
+			return this.months[month]
 		},
 		// getCurrFirstDayWeekId() {
 		// 	const FIRST_DAY = new Date(`${this.currYear}-${this.currMonth}-1`).getDay()
@@ -236,14 +240,14 @@ export default {
 		switchDate(count, stype) {
 			switch (stype) {
 				case 'days': {
-					this.currMonth += count
+					this.switchedDate.month += count
 
-					if (this.currMonth > this.amountMonth) {
-						this.currMonth = 1
-						this.currYear += 1
-					} else if (this.currMonth < 1) {
-						this.currMonth = this.amountMonth
-						this.currYear -= 1
+					if (this.switchedDate.month > this.amountMonth) {
+						this.switchedDate.month = 1
+						this.switchedDate.year += 1
+					} else if (this.switchedDate.month < 1) {
+						this.switchedDate.month = this.amountMonth
+						this.switchedDate.year -= 1
 					}
 
 					// this.createCalendarDays()
@@ -253,7 +257,7 @@ export default {
 			
 				case 'years':
 				case 'months': {
-					this.currYear += count
+					this.switchedDate.year += count
 				}
 
 					break;
@@ -278,21 +282,40 @@ export default {
 		// 		}
 		// 	})
 		// },
-		selectDay(i, type, day, month, year) {
-			this.currDay = day
-			this.currMonth = month
-			this.currYear = year
-			this.setSelectedDate(year, month, day)
+		// selectDay(i, type, day, month, year) {
+		// 	this.currDay = day
+		// 	this.currMonth = month
+		// 	this.currYear = year
+		// 	this.setSelectedDate(year, month, day)
 
-			if (type === 'curr') {
-				this.calendarDays.forEach((c, ci) => {
-					this.$set(this.calendarDays[ci], 'dt_selected', false)
-				})
+		// 	if (type === 'curr') {
+		// 		this.calendarDays.forEach((c, ci) => {
+		// 			this.$set(this.calendarDays[ci], 'dt_selected', false)
+		// 		})
 	
-				this.$set(this.calendarDays[i], 'dt_selected', true)
-			} else if (this.dt_outside_active) {
-				// this.createCalendarDays()
-			}
+		// 		this.$set(this.calendarDays[i], 'dt_selected', true)
+		// 	} else if (this.isOutsideActive) {
+		// 		// this.createCalendarDays()
+		// 	}
+
+		// 	this.$emit('input', new Date(`${year}-${month}-${day}`))
+		// },
+		selectDay({ year, month, day }) {
+			// this.currDay = day
+			// this.currMonth = month
+			// this.currYear = year
+			// this.setSelectedDate(year, month, day)
+			this.setDate('selectedDate', { year, month, day })
+
+			// if (type === 'curr') {
+			// 	this.calendarDays.forEach((c, ci) => {
+			// 		this.$set(this.calendarDays[ci], 'dt_selected', false)
+			// 	})
+	
+			// 	this.$set(this.calendarDays[i], 'dt_selected', true)
+			// } else if (this.isOutsideActive) {
+			// 	// this.createCalendarDays()
+			// }
 
 			this.$emit('input', new Date(`${year}-${month}-${day}`))
 		},
@@ -307,10 +330,12 @@ export default {
 		selecteYear() {
 			console.log('selecteYear')
 		},
-		setSelectedDate(y, m, d) {
-			this.$set(this.selectedDate, 'year', y)
-			this.$set(this.selectedDate, 'month', m)
-			this.$set(this.selectedDate, 'day', d)
+		setDate(name, date) {
+			for(let key in date) {
+				if (key !== null) {
+					this.$set(this[name], key, date[key])
+				}
+			}
 		},
 		openYears() {
 			console.log(this.currYear)
@@ -375,16 +400,13 @@ export default {
 					? new Date()
 					: dt_value 
 
-				this.currDay = dt.getDate()
-				this.currMonth = dt.getMonth() + 1
-				this.currYear = dt.getFullYear()
+				const day = dt.getDate()
+				const month = dt.getMonth() + 1
+				const year = dt.getFullYear()
 
-				if (dt_value && dt_value instanceof Date) {
-					this.setSelectedDate(this.currYear, this.currMonth, this.currDay)
-				}
-
-				this.initialDate = { year: this.currYear, month: this.currMonth, day: this.currDay, }
-				// this.createCalendarDays()
+				this.setDate('selectedDate', { year, month, day })
+				this.setDate('switchedDate', { year, month, day: null })
+				this.setDate('initialDate', { year, month, day })
 			}
 		}
 	}

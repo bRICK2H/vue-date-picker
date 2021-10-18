@@ -4,7 +4,7 @@
 		<VDatePicker
 			:value="new Date()"
 			:cellSize="50"
-			:dt_outside_active="true"
+			:isOutsideActive="true"
 			@input="input"
 		>
 			<!-- <template v-slot="item">

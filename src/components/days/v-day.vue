@@ -1,13 +1,18 @@
 <template>
 	<div class="v-day-container"
 		:style="setStyleDay"
-		:class="[setClassDay, setClassSelectedDay, setClassCurrentDay, setClassOutsideActiveDay]"
+		:class="[
+			setClassDay,
+			setClassCurrentDay,
+			setClassSelectedDay,
+			setClassOutsideActiveDay
+		]"
 		@click="selectDay"
 	>
 
 		<slot>
 			<span class="v-day-item">
-				{{ day }}
+				{{ option.day }}
 			</span>
 		</slot>
 
@@ -17,40 +22,7 @@
 <script>
 export default {
 	name: 'VDay',
-	props: {
-		year: {
-			type: Number,
-			required: true
-		},
-		month: {
-			type: Number,
-			required: true
-		},
-		day: {
-			type: Number,
-			required: true
-		},
-		type: {
-			type: String,
-			required: true
-		},
-		size: {
-			type: Number,
-			required: true
-		},
-		dt_selected: {
-			type: Boolean,
-			required: true
-		},
-		dt_current: {
-			type: Boolean,
-			required: true
-		},
-		dt_outside_active: {
-			type: Boolean,
-			required: true
-		}
-	},
+	props: ['option', 'size'],
 	computed: {
 		setStyleDay() {
 			return {
@@ -60,27 +32,27 @@ export default {
 			}
 		},
 		setClassDay() {
-			return `v-day-container--${this.type}`
+			return `v-day-container--${this.option.type}`
 		},
 		setClassSelectedDay() {
-			return this.dt_selected
-				? `v-day-container--dt_selected`
+			return this.option.is_selected
+				? `v-day-container--is_selected`
 				: null
 		},
 		setClassCurrentDay() {
-			return this.dt_current
-				? `v-day-container--dt_current`
+			return this.option.is_current
+				? `v-day-container--is_current`
 				: null
 		},
 		setClassOutsideActiveDay() {
-			return this.type !== 'curr' && this.dt_outside_active
-				? `v-day-container--dt_outside_active`
+			return this.option.type !== 'curr' && this.option.is_outside_active
+				? `v-day-container--is_outside_active`
 				: null
 		}
 	},
 	methods: {
 		selectDay() {
-			if (this.type === 'curr' || this.dt_outside_active) {
+			if (this.option.type === 'curr' || this.option.is_outside_active) {
 				this.$emit('select-day')
 			}
 		}
@@ -107,7 +79,7 @@ export default {
 				border: 2px solid rgba(31, 31, 51, .1);
 			}
 		}
-		&--dt_outside_active {
+		&--is_outside_active {
 			opacity: .4;
 			cursor: pointer;
 
@@ -115,7 +87,7 @@ export default {
 				border: 2px solid rgba(31, 31, 51, .2);
 			}
 		}
-		&--dt_selected {
+		&--is_selected {
 			font-weight: 700;
 			color: #fff;
 			background-color: #76768c;
@@ -125,7 +97,7 @@ export default {
 				border: 2px solid transparent;
 			}
 		}
-		&--dt_current {
+		&--is_current {
 			font-weight: 600;
 			border: 2px solid rgba(31, 31, 51, .2);
 

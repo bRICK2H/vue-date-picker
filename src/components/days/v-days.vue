@@ -9,26 +9,13 @@
 		/>
 
 		<VDay
-			v-for="({
-				type,
-				year,
-				month,
-				day,
-				dt_selected = false,
-				dt_current = false
-			}, i) of days"
-			:key="`${day}:${i}`"
-			:year="year"
-			:month="month"
-			:day="day"
-			:type="type"
+			v-for="day of days"
+			:key="`${day.month}:${day.day}`"
+			:option="day"
 			:size="size"
-			:dt_selected="dt_selected"
-			:dt_current="dt_current"
-			:dt_outside_active="dt_outside_active"
-			@select-day="selectDay(i, type, day, month, year)"
+			@select-day="$emit('select-day', day)"
 		>
-			<slot v-bind="{ type, day, month, year, dt_selected, dt_current }" />
+			<slot v-bind="day" />
 		</VDay>
 	</div>
 </template>
@@ -44,7 +31,14 @@ export default {
 		VDay,
 		VDayWeek
 	},
-	props: ['daysWeek', 'init', 'selected', 'size', 'dt_outside_active'],
+	props: [
+		'init',
+		'size',
+		'daysWeek',
+		'selected',
+		'switched',
+		'is_outside_active'
+	],
 	data: () => ({
 		days: [],
 		amountDays: 42,
@@ -53,38 +47,38 @@ export default {
 	}),
 	computed: {
 		getCurrFirstDayWeekId() {
-			const { year, month } = this.selected
+			const { year, month } = this.switched
 			const FIRST_DAY = new Date(`${year}-${month}-1`).getDay()
 			return FIRST_DAY === 0 ? this.amountDayWeeks : FIRST_DAY
 		},
 		getLastDayPrevMonth() {
-			const { year, month } = this.selected
+			const { year, month } = this.switched
 			return new Date(new Date(`${year}-${month}-1`) - 1).getDate()
 		},
 		getCurrLastDayMonth() {
-			const { year } = this.selected
+			const { year } = this.switched
 			return new Date(new Date(`${year}-${this.getNextMonth}-1`) - 1).getDate()
 		},
 		getNextMonth() {
-			const { month } = this.selected
+			const { month } = this.switched
 			return month === this.amountMonth
 				? 1
 				: month + 1
 		},
 		getPrevMonth() {
-			const { month } = this.selected
+			const { month } = this.switched
 			return month === 1
 				? this.amountMonth
 				: month - 1
 		},
 		getPrevYear() {
-			const { year, month } = this.selected
+			const { year, month } = this.switched
 			return month === 1
 				? year - 1
 				: year
 		},
 		getNextYear() {
-			const { year, month } = this.selected
+			const { year, month } = this.switched
 			return month === this.amountMonth
 				? year + 1
 				: year
@@ -97,9 +91,9 @@ export default {
 		},
 	},
 	methods: {
-		createCalendarDays() {
-			const { year: i_year, month: i_month, day: i_day } = this.init
-			const { year: s_year, month: s_month, day: s_day } = this.selected
+		createDays() {
+			// const { year: i_year, month: i_month, day: i_day } = this.init
+			// const { year: s_year, month: s_month, day: s_day } = this.selected
 			const PREV_DAYS = this.getDays('prev')
 			const CURR_DAYS = this.getDays('curr')
 			const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
@@ -109,70 +103,90 @@ export default {
 			 * 1. Разобраться со всем текущим подходом вывода дат
 			 * 2. Название переменных и функций
 			 * 3. * на данных момент не работает свич дат и месяцев (продумать более выгодный подход)
+			 * 
+			 * 4. --- Доконца разобраться с вызовами функций и запясями значений (switched, selected)
 			 */
 	
-			this.days.forEach((c, ci) => {
-				if (c.month === s_month && c.year === s_year && c.day === s_day) {
-					this.$set(this.days[ci], 'dt_selected', true)
-				}
+			// this.days.forEach((c, ci) => {
+			// 	if (c.month === s_month && c.year === s_year && c.day === s_day) {
+			// 		this.$set(this.days[ci], 'dt_selected', true)
+			// 	}
 				
-				if (c.month === i_month && c.year === i_year && c.day === i_day) {
-					this.$set(this.days[ci], 'dt_current', true)
-				}
-			})
+			// 	if (c.month === i_month && c.year === i_year && c.day === i_day) {
+			// 		this.$set(this.days[ci], 'dt_current', true)
+			// 	}
+			// })
 		},
 		getDays(type, prevDays = 0, currDays = 0) {
+			const extra = {
+				init: this.init,
+				selected: this.selected,
+				switched: this.switched
+			}
+
 			switch (type) {
 				case 'prev': {
 					const PREV_AMOUNT_DAYS = this.getCurrFirstDayWeekId - 1
 	
 					return PREV_AMOUNT_DAYS > 0
-						? generateDays(
+						? generateDays({
 								type,
-								PREV_AMOUNT_DAYS,
-								this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
-								this.getPrevMonth,
-								this.getPrevYear
-							)
-						: generateDays(
+								days: PREV_AMOUNT_DAYS,
+								counter: this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
+								month: this.getPrevMonth,
+								year: this.getPrevYear,
+								is_outside_active: this.is_outside_active,
+							}, extra)
+						: generateDays({
 								type,
-								this.amountDayWeeks,
-								this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
-								this.getPrevMonth,
-								this.getPrevYear
-							)
+								days: this.amountDayWeeks,
+								counter: this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
+								month: this.getPrevMonth,
+								year: this.getPrevYear,
+								is_outside_active: this.is_outside_active,
+							}, extra)
 					}
 	
 				case 'curr': {
-					const { year, month } = this.selected
-					return generateDays(
+					const { year, month } = this.switched
+					return generateDays({
 						type,
-						this.getCurrLastDayMonth,
-						1,
+						days: this.getCurrLastDayMonth,
+						counter: 1,
 						month,
-						year
-					)
+						year,
+						is_outside_active: null,
+					}, extra)
 				}
 	
 				case 'next': {
-					console.warn('h', type, this.amountDays)
-					return generateDays(
+					return generateDays({
 						type,
-						this.amountDays - (prevDays.length + currDays.length),
-						1,
-						this.getNextMonth,
-						this.getNextYear
-					)
+						days: this.amountDays - (prevDays.length + currDays.length),
+						counter: 1,
+						month: this.getNextMonth,
+						year: this.getNextYear,
+						is_outside_active: this.is_outside_active,
+					}, extra)
 				}
 			}
 		},
 	},
 	watch: {
-		init: {
+		// selected: {
+		// 	deep: true,
+		// 	immediate: true,
+		// 	handler(value) {
+		// 		console.log('selected', value)
+		// 		this.createDays()
+		// 	}
+		// },
+		switched: {
+			deep: true,
 			immediate: true,
-			handler() {
-				console.log('init')
-				this.createCalendarDays()
+			handler(value) {
+				console.log('switched', value)
+				this.createDays()
 			}
 		}
 	}
