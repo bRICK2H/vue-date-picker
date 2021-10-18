@@ -21,24 +21,12 @@ import VMonthItem from './v-month-item'
 export default {
 	name: 'VMonths',
 	components: { VMonthItem },
-	props: {
-		months: {
-			type: Object,
-			required: true
-		},
-		init: {
-			type: Object,
-			required: true
-		},
-		switch: {
-			type: Object,
-			required: true
-		},
-		size: {
-			type: Number,
-			required: true
-		},
-	},
+	props: [
+		'switch',
+		'month',
+		'init',
+		'size'
+	],
 	data: () => ({
 		entryYear: null,
 		detailMonths: []
@@ -52,7 +40,7 @@ export default {
 		}
 	},
 	methods: {
-		modifyMonths() {
+		createMonths() {
 			const entry_year = this.entryYear
 			const { month: init_month_id, year: init_year } = this.init
 			const { month: switch_month_id, year: switch_year } = this.switch
@@ -72,14 +60,14 @@ export default {
 	},
 	watch: {
 		switch() {
-			this.detailMonths = this.modifyMonths()
+			this.detailMonths = this.createMonths()
 		}
 	},
 	created() {
 		const { year } = this.switch
 
 		this.entryYear = year
-		this.detailMonths = this.modifyMonths()
+		this.detailMonths = this.createMonths()
 	}
 }
 </script>
