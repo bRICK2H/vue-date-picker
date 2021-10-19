@@ -1,4 +1,5 @@
 const generateDays = (options, { init, selected, switched }) => {
+	console.log(options)
 	const {
 		day: in_day,
 		month: in_month,
@@ -28,14 +29,16 @@ const generateDays = (options, { init, selected, switched }) => {
 	return new Array(days)
 		.fill(null)
 		.map((c, i) => {
+			const day = i + counter
+			
 			return {
 				type,
-				day: i + counter,
+				day,
 				month,
 				year,
 				is_outside_active,
-				is_current: type === 'curr' && i + counter === in_day && month === in_month && year === in_year,
-				is_selected: i + counter === se_day && sw_month === se_month && sw_year === se_year,
+				is_current: day === in_day && month === in_month && year === in_year,
+				is_selected: day === se_day && month === se_month && year === se_year,
 			}
 		})
 }

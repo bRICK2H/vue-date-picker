@@ -45,7 +45,7 @@ export default {
 				: null
 		},
 		setClassOutsideActiveDay() {
-			return this.option.type !== 'curr' && this.option.is_outside_active
+			return this.option.is_outside_active
 				? `v-day-container--is_outside_active`
 				: null
 		}
@@ -65,7 +65,7 @@ export default {
 		position: relative;
 		border-radius: 50%;
 		border: 2px solid transparent;
-		transition: .2s;
+		// transition: .2s;
 
 		&--prev,
 		&--next {
