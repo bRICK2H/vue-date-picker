@@ -3,7 +3,7 @@
 		:style="setStyleDaysContainer"
 	>
 		<VDayWeek v-for="(dw, i) of daysWeek"
-			:key="`${dw}:${i}`"
+			:key="`${i}:${dw}`"
 			:dayWeek="dw"
 			:size="size"
 		/>
@@ -92,30 +92,15 @@ export default {
 	},
 	methods: {
 		createDays() {
-			// const { year: i_year, month: i_month, day: i_day } = this.init
-			// const { year: s_year, month: s_month, day: s_day } = this.selected
 			const PREV_DAYS = this.getDays('prev')
 			const CURR_DAYS = this.getDays('curr')
 			const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
-			this.days = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
 
-			/**
-			 * 1. Разобраться со всем текущим подходом вывода дат
-			 * 2. Название переменных и функций
-			 * 3. * на данных момент не работает свич дат и месяцев (продумать более выгодный подход)
-			 * 
-			 * 4. --- Доконца разобраться с вызовами функций и запясями значений (switched, selected)
-			 */
-	
-			// this.days.forEach((c, ci) => {
-			// 	if (c.month === s_month && c.year === s_year && c.day === s_day) {
-			// 		this.$set(this.days[ci], 'dt_selected', true)
-			// 	}
-				
-			// 	if (c.month === i_month && c.year === i_year && c.day === i_day) {
-			// 		this.$set(this.days[ci], 'dt_current', true)
-			// 	}
-			// })
+			this.$emit('get-outside-days', {
+				prev: PREV_DAYS[PREV_DAYS.length - 1],
+				next: NEXT_DAYS[0]
+			})
+			this.days = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
 		},
 		getDays(type, prevDays = 0, currDays = 0) {
 			const extra = {
@@ -173,22 +158,21 @@ export default {
 		},
 	},
 	watch: {
-		// selected: {
-		// 	deep: true,
-		// 	immediate: true,
-		// 	handler(value) {
-		// 		console.log('selected', value)
-		// 		this.createDays()
-		// 	}
-		// },
-		switched: {
+		selected: {
 			deep: true,
 			immediate: true,
+			handler(value) {
+				console.log('selected', value)
+				this.createDays()
+			}
+		},
+		switched: {
+			deep: true,
 			handler(value) {
 				console.log('switched', value)
 				this.createDays()
 			}
-		}
+		},
 	}
 }
 </script>

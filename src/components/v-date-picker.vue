@@ -5,7 +5,7 @@
 		<div class="v-date-picker-header v-date-picker-container__v-date-picker-header">
 			<div :style="setStyleHeaderBtnBox"
 				class="v-date-picker-btn-box"
-				@click="switchDate(-1, getCurrTemplate)"
+				@click="switchDate('prev', getCurrTemplate)"
 			>
 				<span class="v-date-picker-btn v-date-picker-prev" :style="setStyleHeaderBtn"></span>
 			</div>
@@ -24,7 +24,7 @@
 			</div>
 			<div :style="setStyleHeaderBtnBox"
 				class="v-date-picker-btn-box"
-				@click="switchDate(1, getCurrTemplate)"
+				@click="switchDate('next', getCurrTemplate)"
 			>
 				<span class="v-date-picker-btn v-date-picker-next" :style="setStyleHeaderBtn"></span>
 			</div>
@@ -32,7 +32,7 @@
 		
 		<!-- DAYS TEMPLATE -->
 
-		<VDays
+		<VDays v-if="template['days']"
 			:daysWeek="daysWeek"
 			:size="cellSize"
 			:init="initialDate"
@@ -40,43 +40,10 @@
 			:switched="switchedDate"
 			:is_outside_active="isOutsideActive"
 			@select-day="selectDay"
+			@get-outside-days="days => outsideDays = days"
 		>
 
 		</VDays>
-		
-		<!-- <div v-if="template['days']"
-			class="v-date-picker-body"
-			:style="setStyleCalendarContainer"
-		>
-			<VDayWeek v-for="(dw, i) of daysWeek"
-				:key="`${dw}:${i}`"
-				:dayWeek="dw"
-				:cellSize="cellSize"
-			/>
-
-			<VDay
-				v-for="({
-					type,
-					year,
-					month,
-					day,
-					dt_selected = false,
-					dt_current = false
-				}, i) of calendarDays"
-				:key="`${day}:${i}`"
-				:year="year"
-				:month="month"
-				:day="day"
-				:type="type"
-				:cellSize="cellSize"
-				:dt_selected="dt_selected"
-				:dt_current="dt_current"
-				:isOutsideActive="isOutsideActive"
-				@select-day="selectDay(i, type, day, month, year)"
-			>
-				<slot v-bind="{ type, day, month, year, dt_selected, dt_current }" />
-			</VDay>
-		</div> -->
 
 		<!-- MONTH TEMPLATE -->
 		<VMonths v-if="template['months']"
@@ -164,53 +131,18 @@ export default {
 		initialDate: {},
 		selectedDate: {},
 		switchedDate: {},
-		
-		// calendarDays: [],
-		calendarYears: [],
+		outsideDays: {},
 
-		// amountDays: 42,
 		amountMonth: 12,
-		// amountDayWeeks: 7,
 		
 		currYear: null,
 		currMonth: null,
-		currDay: null,
 	}),
 	computed: {
 		getCurrMonth() {
 			const { month } = this.switchedDate
 			return this.months[month]
 		},
-		// getCurrFirstDayWeekId() {
-		// 	const FIRST_DAY = new Date(`${this.currYear}-${this.currMonth}-1`).getDay()
-		// 	return FIRST_DAY === 0 ? this.amountDayWeeks : FIRST_DAY
-		// },
-		// getCurrLastDayMonth() {
-		// 	return new Date(new Date(`${this.currYear}-${this.getNextMonth}-1`) - 1).getDate()
-		// },
-		// getPrevMonth() {
-		// 	return this.currMonth === 1
-		// 		? this.amountMonth
-		// 		: this.currMonth - 1
-		// },
-		// getLastDayPrevMonth() {
-		// 	return new Date(new Date(`${this.currYear}-${this.currMonth}-1`) - 1).getDate()
-		// },
-		// getPrevYear() {
-		// 	return this.currMonth === 1
-		// 		? this.currYear - 1
-		// 		: this.currYear
-		// },
-		// getNextMonth() {
-		// 	return this.currMonth === this.amountMonth
-		// 		? 1
-		// 		: this.currMonth + 1
-		// },
-		// getNextYear() {
-		// 	return this.currMonth === this.amountMonth
-		// 		? this.currYear + 1
-		// 		: this.currYear
-		// },
 		getCurrTemplate() {
 			return Object.entries(this.template)
 				.find(curr => {
@@ -219,13 +151,6 @@ export default {
 					return value
 				})[0]
 		},
-
-		// setStyleCalendarContainer() {
-		// 	return {
-		// 		width: `${(this.cellSize * 7) + this.cellSize + 7}px`,
-		// 		height: `${(this.cellSize * 7) + this.cellSize + 7}px`,
-		// 	}
-		// },
 		setStyleTitle() {
 			return { fontSize: `${this.cellSize / 2.25}px` }
 		},
@@ -237,20 +162,18 @@ export default {
 		},
 	},
 	methods: {
-		switchDate(count, stype) {
-			switch (stype) {
+		switchDate(otype, ttype) {
+			switch (ttype) {
 				case 'days': {
-					this.switchedDate.month += count
+					const { year, month } = this.outsideDays[otype]
+					this.setDate('switchedDate', { year, month })
 
-					if (this.switchedDate.month > this.amountMonth) {
-						this.switchedDate.month = 1
-						this.switchedDate.year += 1
-					} else if (this.switchedDate.month < 1) {
-						this.switchedDate.month = this.amountMonth
-						this.switchedDate.year -= 1
-					}
-
-					// this.createCalendarDays()
+					/**
+					 * 1. Вроде все работает - ДНИ, еще раз проверить, посмотреть и улучшить подходы для дней
+					 * 2. Проверить месяцы
+					 * 3. Реализовать переключение шаблонов
+					 * 4. Реализовать годы
+					 */
 				}
 					
 					break;
@@ -264,60 +187,13 @@ export default {
 			}
 
 		},
-		// createCalendarDays() {
-		// 	const { year: i_year, month: i_month, day: i_day } = this.initialDate
-		// 	const { year: s_year, month: s_month, day: s_day } = this.selectedDate
-		// 	const PREV_DAYS = this.getDays('prev')
-		// 	const CURR_DAYS = this.getDays('curr')
-		// 	const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
-		// 	this.calendarDays = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
-
-		// 	this.calendarDays.forEach((c, ci) => {
-		// 		if (c.month === s_month && c.year === s_year && c.day === s_day) {
-		// 			this.$set(this.calendarDays[ci], 'dt_selected', true)
-		// 		}
-				
-		// 		if (c.month === i_month && c.year === i_year && c.day === i_day) {
-		// 			this.$set(this.calendarDays[ci], 'dt_current', true)
-		// 		}
-		// 	})
-		// },
-		// selectDay(i, type, day, month, year) {
-		// 	this.currDay = day
-		// 	this.currMonth = month
-		// 	this.currYear = year
-		// 	this.setSelectedDate(year, month, day)
-
-		// 	if (type === 'curr') {
-		// 		this.calendarDays.forEach((c, ci) => {
-		// 			this.$set(this.calendarDays[ci], 'dt_selected', false)
-		// 		})
-	
-		// 		this.$set(this.calendarDays[i], 'dt_selected', true)
-		// 	} else if (this.isOutsideActive) {
-		// 		// this.createCalendarDays()
-		// 	}
-
-		// 	this.$emit('input', new Date(`${year}-${month}-${day}`))
-		// },
-		selectDay({ year, month, day }) {
-			// this.currDay = day
-			// this.currMonth = month
-			// this.currYear = year
-			// this.setSelectedDate(year, month, day)
+		selectDay({ year, month, day, type }) {
 			this.setDate('selectedDate', { year, month, day })
-
-			// if (type === 'curr') {
-			// 	this.calendarDays.forEach((c, ci) => {
-			// 		this.$set(this.calendarDays[ci], 'dt_selected', false)
-			// 	})
-	
-			// 	this.$set(this.calendarDays[i], 'dt_selected', true)
-			// } else if (this.isOutsideActive) {
-			// 	// this.createCalendarDays()
-			// }
-
 			this.$emit('input', new Date(`${year}-${month}-${day}`))
+
+			if (type !== 'curr') {
+				this.setDate('switchedDate', { year, month })
+			}
 		},
 		switchMonth({ id, year }) {
 			this.changeTemplate('days')
@@ -330,6 +206,11 @@ export default {
 		selecteYear() {
 			console.log('selecteYear')
 		},
+		openYears() {
+			console.log(this.currYear)
+			this.changeTemplate('years')
+			console.log('openYears')
+		},
 		setDate(name, date) {
 			for(let key in date) {
 				if (key !== null) {
@@ -337,54 +218,6 @@ export default {
 				}
 			}
 		},
-		openYears() {
-			console.log(this.currYear)
-			this.changeTemplate('years')
-			console.log('openYears')
-		},
-		// getDays(type, prevDays = 0, currDays = 0) {
-		// 	switch (type) {
-		// 		case 'prev': {
-		// 			const PREV_AMOUNT_DAYS = this.getCurrFirstDayWeekId - 1
-
-		// 			return PREV_AMOUNT_DAYS > 0
-		// 				? generateDays(
-		// 						type,
-		// 						PREV_AMOUNT_DAYS,
-		// 						this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
-		// 						this.getPrevMonth,
-		// 						this.getPrevYear
-		// 					)
-		// 				: generateDays(
-		// 						type,
-		// 						this.amountDayWeeks,
-		// 						this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
-		// 						this.getPrevMonth,
-		// 						this.getPrevYear
-		// 					)
-		// 			}
-
-		// 		case 'curr': {
-		// 			return generateDays(
-		// 				type,
-		// 				this.getCurrLastDayMonth,
-		// 				1,
-		// 				this.currMonth,
-		// 				this.currYear
-		// 			)
-		// 		}
-
-		// 		case 'next': {
-		// 			return generateDays(
-		// 				type,
-		// 				this.amountDays - (prevDays.length + currDays.length),
-		// 				1,
-		// 				this.getNextMonth,
-		// 				this.getNextYear
-		// 			)
-		// 		}
-		// 	}
-		// },
 		changeTemplate(type) {
 			for(const curr in this.template) {
 				this.template[curr] = curr === type
@@ -405,10 +238,10 @@ export default {
 				const year = dt.getFullYear()
 
 				this.setDate('selectedDate', { year, month, day })
-				this.setDate('switchedDate', { year, month, day: null })
 				this.setDate('initialDate', { year, month, day })
+				this.setDate('switchedDate', { year, month })
 			}
-		}
+		},
 	}
 }
 </script>
