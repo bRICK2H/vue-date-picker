@@ -11,8 +11,9 @@
 		<VDay
 			v-for="day of days"
 			:key="`${day.month}:${day.day}`"
-			:option="day"
 			:size="size"
+			:option="day"
+			:interactiveStyles="interactiveStyles"
 			@select-day="$emit('select-day', day)"
 		>
 			<slot v-bind="day" />
@@ -32,12 +33,13 @@ export default {
 		VDayWeek
 	},
 	props: [
-		'init',
 		'size',
 		'daysWeek',
-		'selected',
-		'switched',
-		'is_outside_active'
+		'initiated',
+		'selectable',
+		'switchable',
+		'outsideActive',
+		'interactiveStyles'
 	],
 	data: () => ({
 		days: [],
@@ -47,38 +49,38 @@ export default {
 	}),
 	computed: {
 		getCurrFirstDayWeekId() {
-			const { year, month } = this.switched
+			const { year, month } = this.switchable
 			const FIRST_DAY = new Date(`${year}-${month}-1`).getDay()
 			return FIRST_DAY === 0 ? this.amountDayWeeks : FIRST_DAY
 		},
 		getLastDayPrevMonth() {
-			const { year, month } = this.switched
+			const { year, month } = this.switchable
 			return new Date(new Date(`${year}-${month}-1`) - 1).getDate()
 		},
 		getCurrLastDayMonth() {
-			const { year } = this.switched
+			const { year } = this.switchable
 			return new Date(new Date(`${year}-${this.getNextMonth}-1`) - 1).getDate()
 		},
 		getNextMonth() {
-			const { month } = this.switched
+			const { month } = this.switchable
 			return month === this.amountMonth
 				? 1
 				: month + 1
 		},
 		getPrevMonth() {
-			const { month } = this.switched
+			const { month } = this.switchable
 			return month === 1
 				? this.amountMonth
 				: month - 1
 		},
 		getPrevYear() {
-			const { year, month } = this.switched
+			const { year, month } = this.switchable
 			return month === 1
 				? year - 1
 				: year
 		},
 		getNextYear() {
-			const { year, month } = this.switched
+			const { year, month } = this.switchable
 			return month === this.amountMonth
 				? year + 1
 				: year
@@ -104,9 +106,9 @@ export default {
 		},
 		getDays(type, prevDays = 0, currDays = 0) {
 			const extra = {
-				init: this.init,
-				selected: this.selected,
-				switched: this.switched
+				initiated: this.initiated,
+				selectable: this.selectable,
+				switchable: this.switchable,
 			}
 
 			switch (type) {
@@ -120,7 +122,7 @@ export default {
 								counter: this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
 								month: this.getPrevMonth,
 								year: this.getPrevYear,
-								is_outside_active: this.is_outside_active,
+								outsideActive: this.outsideActive,
 							}, extra)
 						: generateDays({
 								type,
@@ -128,19 +130,19 @@ export default {
 								counter: this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
 								month: this.getPrevMonth,
 								year: this.getPrevYear,
-								is_outside_active: this.is_outside_active,
+								outsideActive: this.outsideActive,
 							}, extra)
 					}
 	
 				case 'curr': {
-					const { year, month } = this.switched
+					const { year, month } = this.switchable
 					return generateDays({
 						type,
 						days: this.getCurrLastDayMonth,
 						counter: 1,
 						month,
 						year,
-						is_outside_active: null,
+						outsideActive: null,
 					}, extra)
 				}
 	
@@ -151,25 +153,25 @@ export default {
 						counter: 1,
 						month: this.getNextMonth,
 						year: this.getNextYear,
-						is_outside_active: this.is_outside_active,
+						outsideActive: this.outsideActive,
 					}, extra)
 				}
 			}
 		},
 	},
 	watch: {
-		selected: {
+		selectable: {
 			deep: true,
 			immediate: true,
 			handler(value) {
-				console.log('selected', value)
+				console.log('selectable', value)
 				this.createDays()
 			}
 		},
-		switched: {
+		switchable: {
 			deep: true,
 			handler(value) {
-				console.log('switched', value)
+				console.log('switchable', value)
 				this.createDays()
 			}
 		},

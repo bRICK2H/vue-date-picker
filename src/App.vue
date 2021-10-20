@@ -4,12 +4,15 @@
 		<VDatePicker
 			:value="new Date()"
 			:cellSize="50"
-			:isOutsideActive="true"
+			:interactiveStyles="true"
+			:outsideActive="true"
 			@input="input"
 		>
 			<!-- <template v-slot="item">
-				<span style="color:pink;font-size: 12px">
+				<span style="color:pink;font-size: 12px;border: 1px solid blue">
 					{{ item.day }}
+
+					<span class="item"></span>
 				</span>
 			</template> -->
 
@@ -56,5 +59,15 @@ export default {
 		font-family: 'Inter', sans-serif;
 		font-weight: 400;
 	}
+}
+.item {
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 5px;
+	height: 5px;
+	background: red;
+	border-radius: 50%;
 }
 </style>

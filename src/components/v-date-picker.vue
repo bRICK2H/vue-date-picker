@@ -5,7 +5,7 @@
 		<div class="v-date-picker-header v-date-picker-container__v-date-picker-header">
 			<div :style="setStyleHeaderBtnBox"
 				class="v-date-picker-btn-box"
-				@click="switchDate('prev', getCurrTemplate)"
+				@click="switchCalendar('prev', getCurrTemplate)"
 			>
 				<span class="v-date-picker-btn v-date-picker-prev" :style="setStyleHeaderBtn"></span>
 			</div>
@@ -19,12 +19,12 @@
 				<span class="v-date-picker-year-title"
 					@click="openYears"
 				>
-					{{ switchedDate.year }}
+					{{ switchable.year }}
 				</span>
 			</div>
 			<div :style="setStyleHeaderBtnBox"
 				class="v-date-picker-btn-box"
-				@click="switchDate('next', getCurrTemplate)"
+				@click="switchCalendar('next', getCurrTemplate)"
 			>
 				<span class="v-date-picker-btn v-date-picker-next" :style="setStyleHeaderBtn"></span>
 			</div>
@@ -35,22 +35,25 @@
 		<VDays v-if="template['days']"
 			:daysWeek="daysWeek"
 			:size="cellSize"
-			:init="initialDate"
-			:selected="selectedDate"
-			:switched="switchedDate"
-			:is_outside_active="isOutsideActive"
+			:initiated="initiated"
+			:selectable="selectable"
+			:switchable="switchable"
+			:outsideActive="outsideActive"
+			:interactiveStyles="interactiveStyles"
 			@select-day="selectDay"
 			@get-outside-days="days => outsideDays = days"
 		>
-
+			<template v-slot="day">
+				<slot v-bind="day"/>
+			</template>
 		</VDays>
 
 		<!-- MONTH TEMPLATE -->
 		<VMonths v-if="template['months']"
 			:months="months"
 			:size="cellSize"
-			:init="initialDate"
-			:switch="{ year: currYear, month: currMonth }"
+			:initiated="initiated"
+			:switchable="switchable"
 			@switch-month="switchMonth"
 		>
 			<template v-slot="month">
@@ -69,19 +72,13 @@
 </template>
 
 <script>
-// import VDay from './v-day.vue'
-// import VDayWeek from './v-day-week.vue'
-
 import VDays from './days/v-days'
 import VMonths from './month/v-months'
 import VYear from './v-year.vue'
-// import { generateDays } from '../utility'
 
 export default {
 	name: 'VDatePicker',
 	components: {
-		// VDay,
-		// VDayWeek,
 		VDays,
 		VMonths,
 		VYear
@@ -92,9 +89,13 @@ export default {
 			type: Number,
 			default: 36
 		},
-		isOutsideActive: {
+		outsideActive: {
 			type: Boolean,
 			default: false
+		},
+		interactiveStyles: {
+			type: Boolean,
+			default: true
 		}
 	},
 	data: () => ({
@@ -107,6 +108,7 @@ export default {
 			6: 'Сб',
 			7: 'Вс'
 		},
+
 		months: {
 			1: 'Январь',
 			2: 'Ферваль',
@@ -128,19 +130,14 @@ export default {
 			years: false
 		},
 		
-		initialDate: {},
-		selectedDate: {},
-		switchedDate: {},
+		initiated: {},
+		selectable: {},
+		switchable: {},
 		outsideDays: {},
-
-		amountMonth: 12,
-		
-		currYear: null,
-		currMonth: null,
 	}),
 	computed: {
 		getCurrMonth() {
-			const { month } = this.switchedDate
+			const { month } = this.switchable
 			return this.months[month]
 		},
 		getCurrTemplate() {
@@ -162,17 +159,17 @@ export default {
 		},
 	},
 	methods: {
-		switchDate(otype, ttype) {
+		switchCalendar(otype, ttype) {
+			console.log(otype, ttype)
 			switch (ttype) {
 				case 'days': {
 					const { year, month } = this.outsideDays[otype]
-					this.setDate('switchedDate', { year, month })
+					this.setDate('switchable', { year, month })
 
 					/**
-					 * 1. Вроде все работает - ДНИ, еще раз проверить, посмотреть и улучшить подходы для дней
-					 * 2. Проверить месяцы
-					 * 3. Реализовать переключение шаблонов
-					 * 4. Реализовать годы
+					 * 1. Вроде все работает - еще раз все проверить, посмотреть и улучшить подходы
+					 * 2. interactiveStyles для месяцев
+					 * 3. Реализовать годы
 					 */
 				}
 					
@@ -180,7 +177,12 @@ export default {
 			
 				case 'years':
 				case 'months': {
-					this.switchedDate.year += count
+					// const { year } = this.outsideDays[otype]
+					const { year } = this.switchable
+					otype === 'prev'
+						? this.setDate('switchable', { year: year - 1})
+						: this.setDate('switchable', { year: year + 1})
+					// this.switchable.year += count
 				}
 
 					break;
@@ -188,26 +190,22 @@ export default {
 
 		},
 		selectDay({ year, month, day, type }) {
-			this.setDate('selectedDate', { year, month, day })
+			this.setDate('selectable', { year, month, day })
 			this.$emit('input', new Date(`${year}-${month}-${day}`))
 
 			if (type !== 'curr') {
-				this.setDate('switchedDate', { year, month })
+				this.setDate('switchable', { year, month })
 			}
 		},
-		switchMonth({ id, year }) {
+		switchMonth({ year, month }) {
+			console.log({year, month})
 			this.changeTemplate('days')
-			console.log({id, year})
-			this.currYear = year
-			this.currMonth = id
-			// this.switchDate(+id - this.currMonth, 'days')
-			// this.switchDate(+month - this.currMonth, 'days')
+			this.setDate('switchable', { year, month })
 		},
 		selecteYear() {
 			console.log('selecteYear')
 		},
 		openYears() {
-			console.log(this.currYear)
 			this.changeTemplate('years')
 			console.log('openYears')
 		},
@@ -237,9 +235,9 @@ export default {
 				const month = dt.getMonth() + 1
 				const year = dt.getFullYear()
 
-				this.setDate('selectedDate', { year, month, day })
-				this.setDate('initialDate', { year, month, day })
-				this.setDate('switchedDate', { year, month })
+				this.setDate('selectable', { year, month, day })
+				this.setDate('initiated', { year, month, day })
+				this.setDate('switchable', { year, month })
 			}
 		},
 	}

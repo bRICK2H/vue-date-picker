@@ -1,8 +1,9 @@
 <template>
-	<div class="v-day-container"
+	<div class="v-day-box"
 		:style="setStyleDay"
 		:class="[
 			setClassDay,
+			setClassInteractive,
 			setClassCurrentDay,
 			setClassSelectedDay,
 			setClassOutsideActiveDay
@@ -22,7 +23,7 @@
 <script>
 export default {
 	name: 'VDay',
-	props: ['option', 'size'],
+	props: ['option', 'size', 'interactiveStyles'],
 	computed: {
 		setStyleDay() {
 			return {
@@ -32,27 +33,32 @@ export default {
 			}
 		},
 		setClassDay() {
-			return `v-day-container--${this.option.type}`
+			return `v-day-box--${this.option.type}`
+		},
+		setClassInteractive() {
+			return this.interactiveStyles
+				? 'interactive'
+				: null
 		},
 		setClassSelectedDay() {
-			return this.option.is_selected
-				? `v-day-container--is_selected`
+			return this.option.isSelected && this.interactiveStyles
+				? `v-day-box--selected`
 				: null
 		},
 		setClassCurrentDay() {
-			return this.option.is_current
-				? `v-day-container--is_current`
+			return this.option.isCurrent && this.interactiveStyles
+				? `v-day-box--current`
 				: null
 		},
 		setClassOutsideActiveDay() {
-			return this.option.is_outside_active
-				? `v-day-container--is_outside_active`
+			return this.option.outsideActive
+				? `v-day-box--outside`
 				: null
 		}
 	},
 	methods: {
 		selectDay() {
-			if (this.option.type === 'curr' || this.option.is_outside_active) {
+			if (this.option.type === 'curr' || this.option.outsideActive) {
 				this.$emit('select-day')
 			}
 		}
@@ -61,7 +67,7 @@ export default {
 </script>
 
 <style lang="scss">
-	.v-day-container {
+	.v-day-box {
 		position: relative;
 		border-radius: 50%;
 		border: 2px solid transparent;
@@ -75,38 +81,46 @@ export default {
 			cursor: pointer;
 			background-color: #fff;
 
-			&:hover {
-				border: 2px solid rgba(31, 31, 51, .1);
+			&.interactive {
+				&:hover {
+					border: 2px solid rgba(31, 31, 51, .1);
+				}
 			}
 		}
-		&--is_outside_active {
+		&--outside {
 			opacity: .4;
 			cursor: pointer;
 
-			&:hover {
-				border: 2px solid rgba(31, 31, 51, .2);
+			&.interactive {
+				&:hover {
+					border: 2px solid rgba(31, 31, 51, .2);
+				}
 			}
 		}
-		&--is_selected {
+		&--selected {
 			font-weight: 700;
 			color: #fff;
 			background-color: #76768c;
 
-			&:hover {
-				background: rgba(118, 118, 140, .8);
-				border: 2px solid transparent;
+			&.interactive {
+				&:hover {
+					background: rgba(118, 118, 140, .8);
+					border: 2px solid transparent;
+				}
 			}
 		}
-		&--is_current {
+		&--current {
 			font-weight: 600;
 			border: 2px solid rgba(31, 31, 51, .2);
 
-			&:hover {
-				border: 2px solid rgba(31, 31, 51, .1);
+			&.interactive {
+				&:hover {
+					border: 2px solid rgba(31, 31, 51, .1);
+				}
 			}
 		}
 	}
-	.v-day-container,
+	.v-day-box,
 	.v-day-item {
 		display: flex;
 		align-items: center;

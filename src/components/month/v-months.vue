@@ -5,9 +5,9 @@
 	
 		<VMonthItem v-for="month of detailMonths"
 			:key="month.name"
-			:month="month"
+			:option="month"
 			:size="size"
-			@switch-month="$emit('switch-month', {id: month.id, year: month.year })"
+			@switch-month="$emit('switch-month', month)"
 		>
 			<slot v-bind="month" />
 		</VMonthItem>
@@ -22,10 +22,10 @@ export default {
 	name: 'VMonths',
 	components: { VMonthItem },
 	props: [
-		'switch',
-		'month',
-		'init',
-		'size'
+		'size',
+		'months',
+		'initiated',
+		'switchable',
 	],
 	data: () => ({
 		entryYear: null,
@@ -42,29 +42,32 @@ export default {
 	methods: {
 		createMonths() {
 			const entry_year = this.entryYear
-			const { month: init_month_id, year: init_year } = this.init
-			const { month: switch_month_id, year: switch_year } = this.switch
+			const { month: init_month_id, year: init_year } = this.initiated
+			const { month: switch_month_id, year: switch_year } = this.switchable
 
 			return Object.entries(this.months)
-				.map(([id, name]) => {
+				.map(([month, name]) => {
 					return {
-						id: +id,
 						name: name,
+						month: +month,
 						year: switch_year,
-						is_outside: switch_year !== init_year,
-						is_current: +id === init_month_id && switch_year === init_year,
-						is_switched: +id === switch_month_id && switch_year === entry_year,
+						isOutside: switch_year !== init_year,
+						isCurrent: +month === init_month_id && switch_year === init_year,
+						isSwitched: +month === switch_month_id && switch_year === entry_year,
 					}
 				})
 		}
 	},
 	watch: {
-		switch() {
-			this.detailMonths = this.createMonths()
+		switchable: {
+			deep: true,
+			handler() {
+				this.detailMonths = this.createMonths()
+			}
 		}
 	},
 	created() {
-		const { year } = this.switch
+		const { year } = this.switchable
 
 		this.entryYear = year
 		this.detailMonths = this.createMonths()

@@ -1,21 +1,21 @@
-const generateDays = (options, { init, selected, switched }) => {
+const generateDays = (options, { initiated, selectable, switchable }) => {
 	console.log(options)
 	const {
 		day: in_day,
 		month: in_month,
 		year: in_year
-	} = init
+	} = initiated
 	const {
 		day: se_day,
 		month: se_month,
 		year: se_year
-	} = selected
+	} = selectable
 	const {
 		month: sw_month,
 		year: sw_year
-	} = switched
+	} = switchable
 
-	console.log('init', init)
+	console.log('initiated', initiated)
 	
 	const {
 		type,
@@ -23,7 +23,7 @@ const generateDays = (options, { init, selected, switched }) => {
 		counter,
 		month,
 		year,
-		is_outside_active,
+		outsideActive,
 	} = options
 
 	return new Array(days)
@@ -36,9 +36,9 @@ const generateDays = (options, { init, selected, switched }) => {
 				day,
 				month,
 				year,
-				is_outside_active,
-				is_current: day === in_day && month === in_month && year === in_year,
-				is_selected: day === se_day && month === se_month && year === se_year,
+				outsideActive,
+				isCurrent: day === in_day && month === in_month && year === in_year,
+				isSelected: day === se_day && month === se_month && year === se_year,
 			}
 		})
 }
