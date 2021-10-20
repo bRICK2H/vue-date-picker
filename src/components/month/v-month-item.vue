@@ -11,7 +11,7 @@
 		
 		<slot>
 			<span class="v-month-item">
-				{{ month.name }}
+				{{ option.name }}
 			</span>
 		</slot>
 
@@ -22,7 +22,7 @@
 export default {
 	name: 'VMonth',
 	props: {
-		month: {
+		option: {
 			type: Object,
 			required: true
 		},
@@ -40,17 +40,17 @@ export default {
 			}
 		},
 		setClassOutsideMonth() {
-			return this.month.is_outside
+			return this.option.isOutside
 				? 'v-month-box--outside'
 				: null
 		},
 		setClassCurrentMonth() {
-			return this.month.is_current
+			return this.option.isCurrent
 				? 'v-month-box--current'
 				: null
 		},
 		setClassSwitchedMonth() {
-			return this.month.is_switched
+			return this.option.isSwitched
 				? 'v-month-box--switched'
 				: null
 		},
