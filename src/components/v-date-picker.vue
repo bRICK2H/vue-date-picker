@@ -54,6 +54,7 @@
 			:size="cellSize"
 			:initiated="initiated"
 			:switchable="switchable"
+			:interactiveStyles="interactiveStyles"
 			@switch-month="switchMonth"
 		>
 			<template v-slot="month">
@@ -63,7 +64,11 @@
 
 		<!-- YEARS TEMPLATE -->
 		<div v-if="template['years']">
-			<VYear
+			<VYears
+				:size="cellSize"
+				:initiated="initiated"
+				:switchable="switchable"
+				:interactiveStyles="interactiveStyles"
 				@select-year="selecteYear"
 			/>
 		</div>
@@ -73,15 +78,15 @@
 
 <script>
 import VDays from './days/v-days'
-import VMonths from './month/v-months'
-import VYear from './v-year.vue'
+import VMonths from './months/v-months'
+import VYears from './years/v-years'
 
 export default {
 	name: 'VDatePicker',
 	components: {
 		VDays,
 		VMonths,
-		VYear
+		VYears
 	},
 	props: {
 		value: null,
@@ -160,7 +165,7 @@ export default {
 	},
 	methods: {
 		switchCalendar(otype, ttype) {
-			console.log(otype, ttype)
+			console.warn('switchCalendar: ', otype, ttype)
 			switch (ttype) {
 				case 'days': {
 					const { year, month } = this.outsideDays[otype]
@@ -177,6 +182,7 @@ export default {
 			
 				case 'years':
 				case 'months': {
+					console.log('eee')
 					// const { year } = this.outsideDays[otype]
 					const { year } = this.switchable
 					otype === 'prev'
@@ -198,9 +204,9 @@ export default {
 			}
 		},
 		switchMonth({ year, month }) {
-			console.log({year, month})
-			this.changeTemplate('days')
+			console.warn('switchMonth: ', {year, month})
 			this.setDate('switchable', { year, month })
+			this.changeTemplate('days')
 		},
 		selecteYear() {
 			console.log('selecteYear')
@@ -263,12 +269,6 @@ export default {
 		justify-content: space-between;
 		align-items: center;
 	}
-	// .v-date-picker-body {
-	// 	display: flex;
-	// 	flex-wrap: wrap;
-	// 	justify-content: space-around;
-	// 	align-content: space-around;
-	// }
 	.v-date-picker-btn-box {
 		display: flex;
 		justify-content: center;
@@ -281,7 +281,6 @@ export default {
 		}
 	}
 	.v-date-picker-btn {
-		
 		position: relative;
 		transition: .2s;
 	}

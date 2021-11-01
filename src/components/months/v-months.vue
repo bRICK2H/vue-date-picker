@@ -4,9 +4,10 @@
 	>
 	
 		<VMonthItem v-for="month of detailMonths"
-			:key="month.name"
-			:option="month"
 			:size="size"
+			:option="month"
+			:key="month.name"
+			:interactiveStyles="interactiveStyles"
 			@switch-month="$emit('switch-month', month)"
 		>
 			<slot v-bind="month" />
@@ -26,6 +27,7 @@ export default {
 		'months',
 		'initiated',
 		'switchable',
+		'interactiveStyles'
 	],
 	data: () => ({
 		entryYear: null,
@@ -64,7 +66,7 @@ export default {
 			handler() {
 				this.detailMonths = this.createMonths()
 			}
-		}
+		},
 	},
 	created() {
 		const { year } = this.switchable

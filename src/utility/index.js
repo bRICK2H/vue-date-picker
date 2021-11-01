@@ -1,4 +1,4 @@
-const generateDays = (options, { initiated, selectable, switchable }) => {
+const generateDays = (options, { initiated, selectable }) => {
 	console.log(options)
 	const {
 		day: in_day,
@@ -10,12 +10,6 @@ const generateDays = (options, { initiated, selectable, switchable }) => {
 		month: se_month,
 		year: se_year
 	} = selectable
-	const {
-		month: sw_month,
-		year: sw_year
-	} = switchable
-
-	console.log('initiated', initiated)
 	
 	const {
 		type,
