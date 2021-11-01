@@ -17,7 +17,7 @@ const generateDays = (options, { initiated, selectable }) => {
 		counter,
 		month,
 		year,
-		outsideActive,
+		isOutsideDays,
 	} = options
 
 	return new Array(days)
@@ -30,7 +30,7 @@ const generateDays = (options, { initiated, selectable }) => {
 				day,
 				month,
 				year,
-				outsideActive,
+				isOutsideDays,
 				isCurrent: day === in_day && month === in_month && year === in_year,
 				isSelected: day === se_day && month === se_month && year === se_year,
 			}

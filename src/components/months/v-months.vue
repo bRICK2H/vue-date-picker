@@ -7,7 +7,7 @@
 			:size="size"
 			:option="month"
 			:key="month.name"
-			:interactiveStyles="interactiveStyles"
+			:isMarked="isMarked"
 			@switch-month="$emit('switch-month', month)"
 		>
 			<slot v-bind="month" />
@@ -27,7 +27,7 @@ export default {
 		'months',
 		'initiated',
 		'switchable',
-		'interactiveStyles'
+		'isMarked'
 	],
 	data: () => ({
 		entryYear: null,

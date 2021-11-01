@@ -4,8 +4,8 @@
 		<VDatePicker
 			:value="new Date()"
 			:cellSize="50"
-			:interactiveStyles="true"
-			:outsideActive="true"
+			:isMarked="true"
+			:isOutsideDays="true"
 			@input="input"
 		>
 			<!-- <template v-slot="item">

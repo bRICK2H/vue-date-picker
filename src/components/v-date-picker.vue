@@ -10,17 +10,22 @@
 				<span class="v-date-picker-btn v-date-picker-prev" :style="setStyleHeaderBtn"></span>
 			</div>
 			<div :style="setStyleTitle" class="v-date-picker-box-title">
-				<span v-show="template['days']"
-					class="v-date-picker-month-title"
-					@click="changeTemplate('months')"
-				>
-					{{ getCurrMonth }},
-				</span>
-				<span class="v-date-picker-year-title"
-					@click="openYears"
-				>
-					{{ switchable.year }}
-				</span>
+				<template v-if="!template['years']">
+					<span v-show="template['days']"
+						class="v-date-picker-month-title"
+						@click="changeTemplate('months')"
+					>
+						{{ getCurrMonth }},
+					</span>
+					<span class="v-date-picker-year-title"
+						@click="openYears"
+					>
+						{{ switchable.year }}
+					</span>
+				</template>
+				<template v-else>
+					{{ switchable.year }} - {{ switchable.year + 8 }}
+				</template>
 			</div>
 			<div :style="setStyleHeaderBtnBox"
 				class="v-date-picker-btn-box"
@@ -38,8 +43,8 @@
 			:initiated="initiated"
 			:selectable="selectable"
 			:switchable="switchable"
-			:outsideActive="outsideActive"
-			:interactiveStyles="interactiveStyles"
+			:isOutsideDays="isOutsideDays"
+			:isMarked="isMarked"
 			@select-day="selectDay"
 			@get-outside-days="days => outsideDays = days"
 		>
@@ -54,7 +59,7 @@
 			:size="cellSize"
 			:initiated="initiated"
 			:switchable="switchable"
-			:interactiveStyles="interactiveStyles"
+			:isMarked="isMarked"
 			@switch-month="switchMonth"
 		>
 			<template v-slot="month">
@@ -68,7 +73,7 @@
 				:size="cellSize"
 				:initiated="initiated"
 				:switchable="switchable"
-				:interactiveStyles="interactiveStyles"
+				:isMarked="isMarked"
 				@select-year="selecteYear"
 			/>
 		</div>
@@ -94,11 +99,11 @@ export default {
 			type: Number,
 			default: 36
 		},
-		outsideActive: {
+		isOutsideDays: {
 			type: Boolean,
 			default: false
 		},
-		interactiveStyles: {
+		isMarked: {
 			type: Boolean,
 			default: true
 		}
@@ -168,30 +173,38 @@ export default {
 			console.warn('switchCalendar: ', otype, ttype)
 			switch (ttype) {
 				case 'days': {
+					console.log('this.outsideDays: ', this.outsideDays)
 					const { year, month } = this.outsideDays[otype]
 					this.setDate('switchable', { year, month })
 
 					/**
 					 * 1. Вроде все работает - еще раз все проверить, посмотреть и улучшить подходы
-					 * 2. interactiveStyles для месяцев
+					 * 2. isMarked для месяцев
 					 * 3. Реализовать годы
 					 */
 				}
 					
-					break;
+					break
 			
-				case 'years':
 				case 'months': {
-					console.log('eee')
-					// const { year } = this.outsideDays[otype]
 					const { year } = this.switchable
+					console.log('year', otype, this.switchable)
 					otype === 'prev'
 						? this.setDate('switchable', { year: year - 1})
 						: this.setDate('switchable', { year: year + 1})
-					// this.switchable.year += count
 				}
 
-					break;
+					break
+
+				case 'years': {
+					const { year } = this.switchable
+					// console.log('year', otype, this.switchable)
+					otype === 'prev'
+						? this.setDate('switchable', { year: year - 9})
+						: this.setDate('switchable', { year: year + 9})
+				}
+
+					break
 			}
 
 		},
