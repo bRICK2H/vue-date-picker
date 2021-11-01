@@ -2,7 +2,7 @@
 	<div class="v-year-box"
 		:style="setStyleYear"
 		:class="[
-			setClassInteractive,
+			setClassMarked,
 			setClassOutsideYear,
 			setClassCurrentYear,
 			setClassSwitchedYear,
@@ -25,7 +25,7 @@ export default {
 	props: [
 		'size',
 		'option',
-		'interactiveStyles'
+		'isMarked'
 	],
 	computed: {
 		setStyleYear() {
@@ -35,9 +35,9 @@ export default {
 				fontSize: `${this.size / 3}px`
 			}
 		},
-		setClassInteractive() {
-			return this.interactiveStyles
-				? 'interactive'
+		setClassMarked() {
+			return this.isMarked
+				? 'marked'
 				: null
 		},
 		setClassOutsideYear() {
@@ -46,12 +46,12 @@ export default {
 				: null
 		},
 		setClassCurrentYear() {
-			return this.option.isCurrent && this.interactiveStyles
+			return this.option.isCurrent && this.isMarked
 				? 'v-year-box--current'
 				: null
 		},
 		setClassSwitchedYear() {
-			return this.option.isSwitched && this.interactiveStyles
+			return this.option.isSwitched && this.isMarked
 				? 'v-year-box--switched'
 				: null
 		},
@@ -70,10 +70,10 @@ export default {
 		color: #1f1f33;
 		font-weight: 400;
 		cursor: pointer;
-		transition: .2s;
+		// transition: .2s;
 		position: relative;
 
-		&.interactive {
+		&.marked {
 			&:hover {
 				border: 2px solid rgba(31, 31, 51, .1);
 			}
@@ -86,7 +86,7 @@ export default {
 			font-weight: 600;
 			border: 2px solid rgba(31, 31, 51, .2);
 
-			&.interactive {
+			&.marked {
 				&:hover {
 					border: 2px solid rgba(31, 31, 51, .1);
 				}
@@ -97,7 +97,7 @@ export default {
 			color: #fff;
 			font-weight: 700;
 
-			&.interactive {
+			&.marked {
 				&:hover {
 					background: rgba(118, 118, 140, .8);
 				}

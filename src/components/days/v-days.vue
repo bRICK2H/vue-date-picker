@@ -13,7 +13,7 @@
 			:key="`${day.month}:${day.day}`"
 			:size="size"
 			:option="day"
-			:interactiveStyles="interactiveStyles"
+			:isMarked="isMarked"
 			@select-day="$emit('select-day', day)"
 		>
 			<slot v-bind="day" />
@@ -38,8 +38,8 @@ export default {
 		'initiated',
 		'selectable',
 		'switchable',
-		'outsideActive',
-		'interactiveStyles'
+		'isOutsideDays',
+		'isMarked'
 	],
 	data: () => ({
 		days: [],
@@ -99,10 +99,17 @@ export default {
 			const NEXT_DAYS = this.getDays('next', PREV_DAYS, CURR_DAYS)
 
 			this.$emit('get-outside-days', {
-				prev: PREV_DAYS[PREV_DAYS.length - 1],
+				prev: this.isOutsideDays
+					? PREV_DAYS[PREV_DAYS.length - 1]
+					: {
+						month: this.getPrevMonth,
+						year: this.getPrevYear,
+					},
 				next: NEXT_DAYS[0]
 			})
 			this.days = [...PREV_DAYS, ...CURR_DAYS, ...NEXT_DAYS]
+
+			console.log('v: ', PREV_DAYS[PREV_DAYS.length - 1], PREV_DAYS)
 		},
 		getDays(type, prevDays = 0, currDays = 0) {
 			const extra = {
@@ -113,7 +120,27 @@ export default {
 			switch (type) {
 				case 'prev': {
 					const PREV_AMOUNT_DAYS = this.getCurrFirstDayWeekId - 1
+
+					console.log(PREV_AMOUNT_DAYS)
 	
+					// return PREV_AMOUNT_DAYS > 0
+					// 	? generateDays({
+					// 			type,
+					// 			days: PREV_AMOUNT_DAYS,
+					// 			counter: this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
+					// 			month: this.getPrevMonth,
+					// 			year: this.getPrevYear,
+					// 			isOutsideDays: this.isOutsideDays,
+					// 		}, extra)
+					// 	: generateDays({
+					// 			type,
+					// 			days: this.amountDayWeeks,
+					// 			counter: this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
+					// 			month: this.getPrevMonth,
+					// 			year: this.getPrevYear,
+					// 			isOutsideDays: this.isOutsideDays,
+					// 		}, extra)
+					// }
 					return PREV_AMOUNT_DAYS > 0
 						? generateDays({
 								type,
@@ -121,16 +148,18 @@ export default {
 								counter: this.getLastDayPrevMonth - (PREV_AMOUNT_DAYS - 1),
 								month: this.getPrevMonth,
 								year: this.getPrevYear,
-								outsideActive: this.outsideActive,
+								isOutsideDays: this.isOutsideDays,
 							}, extra)
-						: generateDays({
+						: this.isOutsideDays
+							? generateDays({
 								type,
 								days: this.amountDayWeeks,
 								counter: this.getLastDayPrevMonth - (this.amountDayWeeks - 1),
 								month: this.getPrevMonth,
 								year: this.getPrevYear,
-								outsideActive: this.outsideActive,
+								isOutsideDays: this.isOutsideDays,
 							}, extra)
+							: []
 					}
 	
 				case 'curr': {
@@ -141,7 +170,7 @@ export default {
 						counter: 1,
 						month,
 						year,
-						outsideActive: null,
+						isOutsideDays: null,
 					}, extra)
 				}
 	
@@ -152,7 +181,7 @@ export default {
 						counter: 1,
 						month: this.getNextMonth,
 						year: this.getNextYear,
-						outsideActive: this.outsideActive,
+						isOutsideDays: this.isOutsideDays,
 					}, extra)
 				}
 			}

@@ -2,8 +2,7 @@
 	<div class="v-month-box"
 		:style="setStyleMonth"
 		:class="[
-			setClassInteractive,
-			setClassOutsideMonth,
+			setClassMarked,
 			setClassCurrentMonth,
 			setClassSwitchedMonth,
 		]"
@@ -25,7 +24,7 @@ export default {
 	props: [
 		'size',
 		'option',
-		'interactiveStyles'
+		'isMarked'
 	],
 	computed: {
 		setStyleMonth() {
@@ -35,23 +34,23 @@ export default {
 				fontSize: `${this.size / 3}px`
 			}
 		},
-		setClassInteractive() {
-			return this.interactiveStyles
-				? 'interactive'
+		setClassMarked() {
+			return this.isMarked
+				? 'marked'
 				: null
 		},
-		setClassOutsideMonth() {
-			return this.option.isOutside
-				? 'v-month-box--outside'
-				: null
-		},
+		// setClassOutsideMonth() {
+		// 	return this.option.isOutside
+		// 		? 'v-month-box--outside'
+		// 		: null
+		// },
 		setClassCurrentMonth() {
-			return this.option.isCurrent && this.interactiveStyles
+			return this.option.isCurrent && this.isMarked
 				? 'v-month-box--current'
 				: null
 		},
 		setClassSwitchedMonth() {
-			return this.option.isSwitched && this.interactiveStyles
+			return this.option.isSwitched && this.isMarked
 				? 'v-month-box--switched'
 				: null
 		},
@@ -73,20 +72,17 @@ export default {
 		transition: .2s;
 		position: relative;
 
-		&.interactive {
+		&.marked {
 			&:hover {
 				border: 2px solid rgba(31, 31, 51, .1);
 			}
 		}
 
-		&--outside {
-			opacity: .5;
-		}
 		&--current {
 			font-weight: 600;
 			border: 2px solid rgba(31, 31, 51, .2);
 
-			&.interactive {
+			&.marked {
 				&:hover {
 					border: 2px solid rgba(31, 31, 51, .1);
 				}
@@ -97,7 +93,7 @@ export default {
 			color: #fff;
 			font-weight: 700;
 
-			&.interactive {
+			&.marked {
 				&:hover {
 					background: rgba(118, 118, 140, .8);
 				}

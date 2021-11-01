@@ -3,10 +3,10 @@
 		:style="setStyleDay"
 		:class="[
 			setClassDay,
-			setClassInteractive,
+			setClassMarked,
 			setClassCurrentDay,
 			setClassSelectedDay,
-			setClassOutsideActiveDay
+			setClassOutsideDays
 		]"
 		@click="selectDay"
 	>
@@ -26,7 +26,7 @@ export default {
 	props: [
 		'size',
 		'option',
-		'interactiveStyles'
+		'isMarked'
 	],
 	computed: {
 		setStyleDay() {
@@ -39,30 +39,32 @@ export default {
 		setClassDay() {
 			return `v-day-box--${this.option.type}`
 		},
-		setClassInteractive() {
-			return this.interactiveStyles
-				? 'interactive'
+		setClassMarked() {
+			return this.isMarked
+				? 'marked'
 				: null
 		},
 		setClassSelectedDay() {
-			return this.option.isSelected && this.interactiveStyles
-				? `v-day-box--selected`
+			return this.option.isSelected && this.isMarked
+				? 'v-day-box--selected'
 				: null
 		},
 		setClassCurrentDay() {
-			return this.option.isCurrent && this.interactiveStyles
-				? `v-day-box--current`
+			return this.option.isCurrent && this.isMarked
+				? 'v-day-box--current'
 				: null
 		},
-		setClassOutsideActiveDay() {
-			return this.option.outsideActive
+		setClassOutsideDays() {
+			const { isOutsideDays } = this.option
+	
+			return isOutsideDays === false
 				? `v-day-box--outside`
 				: null
 		}
 	},
 	methods: {
 		selectDay() {
-			if (this.option.type === 'curr' || this.option.outsideActive) {
+			if (this.option.type === 'curr' || this.option.isOutsideDays) {
 				this.$emit('select-day')
 			}
 		}
@@ -75,27 +77,24 @@ export default {
 		position: relative;
 		border-radius: 50%;
 		border: 2px solid transparent;
-		// transition: .2s;
+		transition: border .3s;
+		cursor: pointer;
+
+		&.marked {
+			&:hover {
+				border: 2px solid rgba(31, 31, 51, .1);
+			}
+		}
 
 		&--prev,
 		&--next {
-			opacity: .2;
-		}
-		&--curr {
-			cursor: pointer;
-			background-color: #fff;
-
-			&.interactive {
-				&:hover {
-					border: 2px solid rgba(31, 31, 51, .1);
-				}
-			}
+			opacity: .3;
 		}
 		&--outside {
-			opacity: .4;
-			cursor: pointer;
+			opacity: 0;
+			cursor: default;
 
-			&.interactive {
+			&.marked {
 				&:hover {
 					border: 2px solid rgba(31, 31, 51, .2);
 				}
@@ -106,7 +105,7 @@ export default {
 			color: #fff;
 			background-color: #76768c;
 
-			&.interactive {
+			&.marked {
 				&:hover {
 					background: rgba(118, 118, 140, .8);
 					border: 2px solid transparent;
@@ -117,7 +116,7 @@ export default {
 			font-weight: 600;
 			border: 2px solid rgba(31, 31, 51, .2);
 
-			&.interactive {
+			&.marked {
 				&:hover {
 					border: 2px solid rgba(31, 31, 51, .1);
 				}

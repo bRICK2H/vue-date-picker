@@ -7,7 +7,7 @@
 			:size="size"
 			:option="year"
 			:key="year.name"
-			:interactiveStyles="interactiveStyles"
+			:isMarked="isMarked"
 			@switch-year="$emit('switch-year', year)"
 		>
 			<slot v-bind="year" />
@@ -24,12 +24,12 @@ export default {
 	components: { VYearItem },
 	props: [
 		'size',
-		'year',
 		'initiated',
 		'switchable',
-		'interactiveStyles'
+		'isMarked'
 	],
 	data: () => ({
+		entryYear: null,
 		detailYears: []
 	}),
 	computed: {
@@ -40,29 +40,71 @@ export default {
 			}
 		}
 	},
+	methods: {
+		createYear() {
+			// const curr = new Date().getFullYear()
+			const { year: sw_year } = this.switchable
+			const { year: init_year } = this.initiated
+			console.log('sw_year: ', sw_year)
+			const x = Math.round(sw_year - Math.round(init_year % 10) % 10)
+			console.log(Math.round(sw_year - Math.round(init_year % 10) % 10)) 
+
+			return Array(9).fill(null)
+				.map((c, i) => {
+					const year = x + i
+					const isCurrent = year === init_year
+					const isSwitched = year === this.entryYear
+					
+					if (year < sw_year) {
+						return { type: 'prev', year, isCurrent, isSwitched }
+					} else if (year > sw_year) {
+						return { type: 'next', year, isCurrent, isSwitched }
+					} else {
+						return { type: 'curr', year, isCurrent, isSwitched }
+					}
+				})
+		}
+		// createYear() {
+		// 	// const curr = new Date().getFullYear()
+		// 	const { year: sw_year } = this.switchable
+		// 	const { year: init_year } = this.initiated
+		// 	console.log('sw_year: ', sw_year)
+
+		// 	let x = sw_year < init_year ? 
+
+		// 	return Array(9).fill(null)
+		// 		.map((c, i) => {
+		// 			console.log(i)
+		// 			const year = sw_year + i
+		// 			const isCurrent = year === init_year
+		// 			const isSwitched = year === this.entryYear
+		// 			console.log(year, sw_year)
+					
+		// 			if (year < sw_year) {
+		// 				return { type: 'prev', year, isCurrent, isSwitched }
+		// 			} else if (year > sw_year) {
+		// 				return { type: 'next', year, isCurrent, isSwitched }
+		// 			} else {
+		// 				return { type: 'curr', year, isCurrent, isSwitched }
+		// 			}
+		// 		})
+		// }
+	},
 	watch: {
 		switchable: {
 			deep: true,
 			handler() {
-				// this.detailYears = this.createYear()
+				this.detailYears = this.createYear()
+				console.log(this.detailYears)
 			}
 		},
 	},
 	created() {
-		const curr = new Date().getFullYear()
-		const prev = curr - 4
+		const { year } = this.switchable
 
-		this.detailYears = Array(9).fill(null)
-			.map((c, i) => {
-				const year = prev + i
-				if (year < curr) {
-					return { type: 'prev', year }
-				} else if (year > curr) {
-					return { type: 'next', year }   
-				} else {
-					return { type: 'curr', year, isCurrent: true }
-				}
-			})
+		this.entryYear = year
+		this.detailYears = this.createYear()
+		console.log(this.detailYears)
 	}
 }
 </script>
