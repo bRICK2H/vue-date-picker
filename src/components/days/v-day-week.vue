@@ -9,16 +9,10 @@
 <script>
 export default {
 	name: 'VDayWeek',
-	props: {
-		dayWeek: {
-			type: String,
-			required: true
-		},
-		size: {
-			type: Number,
-			required: true
-		},
-	},
+	props: [
+		'size',
+		'dayWeek'
+	],
 	computed: {
 		setStyleDayWeek() {
 			return {

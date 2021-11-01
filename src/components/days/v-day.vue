@@ -23,7 +23,11 @@
 <script>
 export default {
 	name: 'VDay',
-	props: ['option', 'size', 'interactiveStyles'],
+	props: [
+		'size',
+		'option',
+		'interactiveStyles'
+	],
 	computed: {
 		setStyleDay() {
 			return {

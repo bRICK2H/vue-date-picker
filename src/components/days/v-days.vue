@@ -108,7 +108,6 @@ export default {
 			const extra = {
 				initiated: this.initiated,
 				selectable: this.selectable,
-				switchable: this.switchable,
 			}
 
 			switch (type) {

@@ -2,6 +2,7 @@
 	<div class="v-month-box"
 		:style="setStyleMonth"
 		:class="[
+			setClassInteractive,
 			setClassOutsideMonth,
 			setClassCurrentMonth,
 			setClassSwitchedMonth,
@@ -21,16 +22,11 @@
 <script>
 export default {
 	name: 'VMonth',
-	props: {
-		option: {
-			type: Object,
-			required: true
-		},
-		size: {
-			type: Number,
-			required: true
-		},
-	},
+	props: [
+		'size',
+		'option',
+		'interactiveStyles'
+	],
 	computed: {
 		setStyleMonth() {
 			return {
@@ -39,18 +35,23 @@ export default {
 				fontSize: `${this.size / 3}px`
 			}
 		},
+		setClassInteractive() {
+			return this.interactiveStyles
+				? 'interactive'
+				: null
+		},
 		setClassOutsideMonth() {
 			return this.option.isOutside
 				? 'v-month-box--outside'
 				: null
 		},
 		setClassCurrentMonth() {
-			return this.option.isCurrent
+			return this.option.isCurrent && this.interactiveStyles
 				? 'v-month-box--current'
 				: null
 		},
 		setClassSwitchedMonth() {
-			return this.option.isSwitched
+			return this.option.isSwitched && this.interactiveStyles
 				? 'v-month-box--switched'
 				: null
 		},
@@ -72,8 +73,10 @@ export default {
 		transition: .2s;
 		position: relative;
 
-		&:hover {
-			border: 2px solid rgba(31, 31, 51, .1);
+		&.interactive {
+			&:hover {
+				border: 2px solid rgba(31, 31, 51, .1);
+			}
 		}
 
 		&--outside {
@@ -83,8 +86,10 @@ export default {
 			font-weight: 600;
 			border: 2px solid rgba(31, 31, 51, .2);
 
-			&:hover {
-				border: 2px solid rgba(31, 31, 51, .1);
+			&.interactive {
+				&:hover {
+					border: 2px solid rgba(31, 31, 51, .1);
+				}
 			}
 		}
 		&--switched {
@@ -92,8 +97,10 @@ export default {
 			color: #fff;
 			font-weight: 700;
 
-			&:hover {
-				background: rgba(118, 118, 140, .8);
+			&.interactive {
+				&:hover {
+					background: rgba(118, 118, 140, .8);
+				}
 			}
 		}
 	}
