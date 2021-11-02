@@ -42,18 +42,20 @@ export default {
 	},
 	methods: {
 		createYear() {
-			// const curr = new Date().getFullYear()
 			const { year: sw_year } = this.switchable
 			const { year: init_year } = this.initiated
 			console.log('sw_year: ', sw_year)
-			const x = Math.round(sw_year - Math.round(init_year % 10) % 10)
-			console.log(Math.round(sw_year - Math.round(init_year % 10) % 10)) 
+
+			let y = init_year - sw_year
+			let c = Math.ceil(y / 9)
+			const start = sw_year - (9 * c - y)
 
 			return Array(9).fill(null)
 				.map((c, i) => {
-					const year = x + i
+					const year = start + i
 					const isCurrent = year === init_year
 					const isSwitched = year === this.entryYear
+
 					
 					if (year < sw_year) {
 						return { type: 'prev', year, isCurrent, isSwitched }
