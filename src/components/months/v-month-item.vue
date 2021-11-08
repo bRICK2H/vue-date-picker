@@ -6,7 +6,7 @@
 			setClassCurrentMonth,
 			setClassSwitchedMonth,
 		]"
-		@click="$emit('switch-month')"
+		@click="$emit('select-month')"
 	>
 		
 		<slot>
@@ -69,6 +69,16 @@ export default {
 		&.marked {
 			&:hover {
 				border: 2px solid rgba(31, 31, 51, .1);
+			}
+		}
+		&--current {
+			font-weight: 600;
+			border: 2px solid rgba(31, 31, 51, .2);
+
+			&.marked {
+				&:hover {
+					border: 2px solid rgba(31, 31, 51, .1);
+				}
 			}
 		}
 		&--switched {

@@ -8,7 +8,7 @@
 			:option="month"
 			:key="month.name"
 			:isMarked="isMarked"
-			@switch-month="$emit('switch-month', month)"
+			@select-month="$emit('select-month', month)"
 		>
 			<slot v-bind="month" />
 		</VMonthItem>
@@ -25,9 +25,9 @@ export default {
 	props: [
 		'size',
 		'months',
+		'isMarked',
 		'initiated',
 		'switchable',
-		'isMarked'
 	],
 	data: () => ({
 		entryYear: null,
@@ -64,11 +64,13 @@ export default {
 		switchable: {
 			deep: true,
 			handler() {
+				console.log('sw')
 				this.detailMonths = this.createMonths()
 			}
 		},
 	},
 	created() {
+		console.log('cr')
 		const { year } = this.switchable
 
 		this.entryYear = year

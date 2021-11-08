@@ -6,7 +6,7 @@
 			setClassCurrentYear,
 			setClassSwitchedYear,
 		]"
-		@click="$emit('switch-year')"
+		@click="$emit('select-year')"
 	>
 		
 		<slot>

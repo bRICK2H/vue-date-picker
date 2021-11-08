@@ -8,7 +8,7 @@
 			:option="year"
 			:key="year.name"
 			:isMarked="isMarked"
-			@switch-year="$emit('switch-year', year)"
+			@select-year="$emit('select-year', year)"
 		>
 			<slot v-bind="year" />
 		</VYearItem>

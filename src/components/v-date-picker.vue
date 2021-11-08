@@ -7,7 +7,9 @@
 				class="v-date-picker-btn-box"
 				@click="switchCalendar('prev', getCurrTemplate)"
 			>
-				<span class="v-date-picker-btn v-date-picker-prev" :style="setStyleHeaderBtn"></span>
+				<span class="v-date-picker-btn v-date-picker-prev"
+					:style="setStyleHeaderBtn"
+				></span>
 			</div>
 			<div :style="setStyleTitle" class="v-date-picker-box-title">
 				<template v-if="!template['years']">
@@ -57,10 +59,10 @@
 		<VMonths v-if="template['months']"
 			:months="months"
 			:size="cellSize"
+			:isMarked="isMarked"
 			:initiated="initiated"
 			:switchable="switchable"
-			:isMarked="isMarked"
-			@switch-month="switchMonth"
+			@select-month="selectMonth"
 		>
 			<template v-slot="month">
 				<slot v-bind="month"/>
@@ -74,7 +76,7 @@
 				:initiated="initiated"
 				:switchable="switchable"
 				:isMarked="isMarked"
-				@select-year="selecteYear"
+				@select-year="selectYear"
 				@get-years-header="getYearsHeader"
 			/>
 		</div>
@@ -182,8 +184,7 @@ export default {
 
 					/**
 					 * 1. Вроде все работает - еще раз все проверить, посмотреть и улучшить подходы
-					 * 2. isMarked для месяцев
-					 * 3. Реализовать годы
+					 * 2. Если находиться в годах и вернуться к месяцам, всегда показываеться выбранный месяц (устранить) 
 					 */
 				}
 					
@@ -219,19 +220,20 @@ export default {
 				this.setDate('switchable', { year, month })
 			}
 		},
-		switchMonth({ year, month }) {
-			console.warn('switchMonth: ', {year, month})
+		selectMonth({ year, month }) {
+			console.warn('switchMonth: ', { year, month })
 			this.setDate('switchable', { year, month })
 			this.changeTemplate('days')
 		},
-		selecteYear() {
-			console.log('selecteYear')
+		selectYear({ year }) {
+			this.setDate('switchable', { year })
+			this.changeTemplate('months')
 		},
 		getYearsHeader(string) {
 			this.yearHeader = string
 		},
-		openYears() {
-			this.changeTemplate('years')
+		openYears(year) {
+			this.changeTemplate('years', year)
 			console.log('openYears')
 		},
 		setDate(name, date) {
