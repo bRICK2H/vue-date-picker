@@ -3,7 +3,7 @@
 		:style="setStyleContainerYear"
 	>
 	
-		<VYearItem v-for="year of detailYears"
+		<VYearItem v-for="year of years"
 			:size="size"
 			:option="year"
 			:key="year.name"
@@ -24,13 +24,14 @@ export default {
 	components: { VYearItem },
 	props: [
 		'size',
+		'isMarked',
 		'initiated',
 		'switchable',
-		'isMarked'
 	],
 	data: () => ({
+		years: [],
 		entryYear: null,
-		detailYears: []
+		isLoad: false
 	}),
 	computed: {
 		setStyleContainerYear() {
@@ -44,70 +45,41 @@ export default {
 		createYear() {
 			const { year: sw_year } = this.switchable
 			const { year: init_year } = this.initiated
-			console.log('sw_year: ', sw_year)
-
-			let y = init_year - sw_year
-			let c = Math.ceil(y / 9)
-			const start = sw_year - (9 * c - y)
+			const diff = init_year - sw_year
+			const indexRange = Math.ceil(diff / 9)
+			const start = sw_year - ((9 * indexRange) - diff)
 
 			return Array(9).fill(null)
 				.map((c, i) => {
 					const year = start + i
-					const isCurrent = year === init_year
-					const isSwitched = year === this.entryYear
 
-					
-					if (year < sw_year) {
-						return { type: 'prev', year, isCurrent, isSwitched }
-					} else if (year > sw_year) {
-						return { type: 'next', year, isCurrent, isSwitched }
-					} else {
-						return { type: 'curr', year, isCurrent, isSwitched }
+					return {
+						year,
+						isCurrent: year === init_year,
+						isSwitched: year === this.entryYear
 					}
 				})
 		}
-		// createYear() {
-		// 	// const curr = new Date().getFullYear()
-		// 	const { year: sw_year } = this.switchable
-		// 	const { year: init_year } = this.initiated
-		// 	console.log('sw_year: ', sw_year)
-
-		// 	let x = sw_year < init_year ? 
-
-		// 	return Array(9).fill(null)
-		// 		.map((c, i) => {
-		// 			console.log(i)
-		// 			const year = sw_year + i
-		// 			const isCurrent = year === init_year
-		// 			const isSwitched = year === this.entryYear
-		// 			console.log(year, sw_year)
-					
-		// 			if (year < sw_year) {
-		// 				return { type: 'prev', year, isCurrent, isSwitched }
-		// 			} else if (year > sw_year) {
-		// 				return { type: 'next', year, isCurrent, isSwitched }
-		// 			} else {
-		// 				return { type: 'curr', year, isCurrent, isSwitched }
-		// 			}
-		// 		})
-		// }
 	},
 	watch: {
 		switchable: {
 			deep: true,
+			immediate: true,
 			handler() {
-				this.detailYears = this.createYear()
-				console.log(this.detailYears)
+				if (!this.isLoad) {
+					const { year } = this.switchable
+					
+					this.entryYear = year
+					this.isLoad = true
+				}
+				
+				this.years = this.createYear()
+
+				const range = this.years.map(({ year }) => year)
+				this.$emit('get-years-header', `${range[0]} - ${Math.max(...range)}`)
 			}
 		},
 	},
-	created() {
-		const { year } = this.switchable
-
-		this.entryYear = year
-		this.detailYears = this.createYear()
-		console.log(this.detailYears)
-	}
 }
 </script>
 

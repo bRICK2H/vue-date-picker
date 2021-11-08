@@ -39,11 +39,6 @@ export default {
 				? 'marked'
 				: null
 		},
-		// setClassOutsideMonth() {
-		// 	return this.option.isOutside
-		// 		? 'v-month-box--outside'
-		// 		: null
-		// },
 		setClassCurrentMonth() {
 			return this.option.isCurrent && this.isMarked
 				? 'v-month-box--current'
@@ -69,23 +64,11 @@ export default {
 		color: #1f1f33;
 		font-weight: 400;
 		cursor: pointer;
-		transition: .2s;
 		position: relative;
 
 		&.marked {
 			&:hover {
 				border: 2px solid rgba(31, 31, 51, .1);
-			}
-		}
-
-		&--current {
-			font-weight: 600;
-			border: 2px solid rgba(31, 31, 51, .2);
-
-			&.marked {
-				&:hover {
-					border: 2px solid rgba(31, 31, 51, .1);
-				}
 			}
 		}
 		&--switched {

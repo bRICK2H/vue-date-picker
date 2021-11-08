@@ -24,7 +24,7 @@
 					</span>
 				</template>
 				<template v-else>
-					{{ switchable.year }} - {{ switchable.year + 8 }}
+					{{ yearHeader }}
 				</template>
 			</div>
 			<div :style="setStyleHeaderBtnBox"
@@ -75,6 +75,7 @@
 				:switchable="switchable"
 				:isMarked="isMarked"
 				@select-year="selecteYear"
+				@get-years-header="getYearsHeader"
 			/>
 		</div>
 
@@ -133,6 +134,8 @@ export default {
 			11: 'Ноябрь',
 			12: 'Декабрь'
 		},
+
+		yearHeader: '',
 		
 		template: {
 			days: true,
@@ -223,6 +226,9 @@ export default {
 		},
 		selecteYear() {
 			console.log('selecteYear')
+		},
+		getYearsHeader(string) {
+			this.yearHeader = string
 		},
 		openYears() {
 			this.changeTemplate('years')

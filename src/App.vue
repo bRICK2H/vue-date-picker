@@ -4,7 +4,7 @@
 		<VDatePicker
 			:value="new Date()"
 			:cellSize="50"
-			:isMarked="false"
+			:isMarked="true"
 			:isOutsideDays="true"
 			@input="input"
 		>
