@@ -2,8 +2,8 @@
 	<div class="wrapper">
 
 		<VDatePicker
-			:value="new Date()"
-			:cellSize="50"
+			:value="[new Date(), new Date]"
+			:cellSize="40"
 			:isMarked="true"
 			:isOutsideDays="true"
 			@input="input"
@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import VDatePicker from './components/v-date-picker.vue'
+import VDatePicker from './components/App.vue'
 
 export default {
 	name: 'VDatePickerWrapper',

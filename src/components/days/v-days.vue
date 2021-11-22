@@ -14,7 +14,9 @@
 			:size="size"
 			:option="day"
 			:isMarked="isMarked"
+			:range="range"
 			@select-day="$emit('select-day', day)"
+			@over-day="$emit('over-day', day)"
 		>
 			<slot v-bind="day" />
 		</VDay>
@@ -34,12 +36,13 @@ export default {
 	},
 	props: [
 		'size',
+		'range',
+		'isMarked',
 		'daysWeek',
 		'initiated',
 		'selectable',
 		'switchable',
 		'isOutsideDays',
-		'isMarked'
 	],
 	data: () => ({
 		days: [],
@@ -87,10 +90,16 @@ export default {
 		},
 		setStyleDaysContainer() {
 			return {
-				width: `${(this.size * 7) + this.size + 7}px`,
-				height: `${(this.size * 7) + this.size + 7}px`,
+				width: `${this.size * 7}px`,
+				height: `${this.size * 7}px`,
 			}
 		},
+		// setStyleDaysContainer() {
+		// 	return {
+		// 		width: `${(this.size * 7) + this.size + 7}px`,
+		// 		height: `${(this.size * 7) + this.size + 7}px`,
+		// 	}
+		// },
 	},
 	methods: {
 		createDays() {
@@ -211,7 +220,7 @@ export default {
 	.v-days-container {
 		display: flex;
 		flex-wrap: wrap;
-		justify-content: space-around;
-		align-content: space-around;
+		// justify-content: space-around;
+		// align-content: space-around;
 	}
 </style>

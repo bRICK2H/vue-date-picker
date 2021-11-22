@@ -47,9 +47,7 @@
 			:switchable="switchable"
 			:isOutsideDays="isOutsideDays"
 			:isMarked="isMarked"
-			:range="range"
 			@select-day="selectDay"
-			@over-day="day => $emit('over-day', day)"
 			@get-outside-days="days => outsideDays = days"
 		>
 			<template v-slot="day">
@@ -98,13 +96,21 @@ export default {
 		VMonths,
 		VYears
 	},
-	props: [
-		'date',
-		'range',
-		'isMarked',
-		'cellSize',
-		'isOutsideDays'
-	],
+	props: {
+		value: null,
+		cellSize: {
+			type: Number,
+			default: 36
+		},
+		isOutsideDays: {
+			type: Boolean,
+			default: false
+		},
+		isMarked: {
+			type: Boolean,
+			default: true
+		}
+	},
 	data: () => ({
 		daysWeek: {
 			1: 'Пн',
@@ -131,6 +137,7 @@ export default {
 			12: 'Декабрь'
 		},
 
+		isRange: false,
 		yearHeader: '',
 		
 		template: {
@@ -208,7 +215,7 @@ export default {
 		},
 		selectDay({ year, month, day, type }) {
 			this.setDate('selectable', { year, month, day })
-			this.$emit('input', new Date(`${year},${month},${day}`))
+			this.$emit('input', new Date(`${year}-${month}-${day}`))
 
 			if (type !== 'curr') {
 				this.setDate('switchable', { year, month })
@@ -243,23 +250,62 @@ export default {
 			}
 		}
 	},
-	created() {
-		const currMonth = new Date().getMonth() + 1
-		const year = this.date.getFullYear()
-		const month = this.date.getMonth() + 1
-		const day = currMonth === month
-			? this.date.getDate()
-			: null
+	watch: {
+		value: {
+			immediate: true,
+			handler(dt_value) {
+				const new_date = new Date
+				let date = null
+				console.log('dt_value', Array.isArray(dt_value))
 
-		// this.setDate('selectable', { year, month, day })
-		this.setDate('initiated', { year, month, day })
-		this.setDate('switchable', { year, month })
+				if (Array.isArray(dt_value)) {
+					const [fdt, sdt] = dt_value
+					date = []
+
+					if (dt_value.length > 1) {
+						this.isRange = true
+						if (fdt instanceof Date) {
+							date.push(fdt)
+						} else {
+							date.push(new_date) 
+						}
+
+						if (sdt instanceof Date) {
+							date.push(sdt)
+						} else {
+							date.push(new_date)
+						}
+						console.warn('array has 2')
+					} else {
+						if (fdt && fdt instanceof Date) {
+							date = fdt
+						} else {
+							date = new_date
+						}
+					}
+				} else {
+					this.isRange = false
+					date = !dt_value || !(dt_value instanceof Date)
+					? new Date
+					: dt_value 
+				}
+
+				const day = date.getDate()
+				const month = date.getMonth() + 1
+				const year = date.getFullYear()
+
+				this.setDate('selectable', { year, month, day })
+				this.setDate('initiated', { year, month, day })
+				this.setDate('switchable', { year, month })
+			}
+		},
 	}
 }
 </script>
 
 <style lang="scss">
 	.v-date-picker-container {
+		margin: auto;
 		user-select: none;
 		background-color: #fff;
 		padding: 24px;

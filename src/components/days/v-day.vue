@@ -6,9 +6,11 @@
 			setClassMarked,
 			setClassCurrentDay,
 			setClassSelectedDay,
-			setClassOutsideDays
+			setClassOutsideDays,
+			setClassRangeDays
 		]"
-		@click="selectDay"
+		@click="selectDay('select')"
+		@mouseenter="selectDay('over')"
 	>
 
 		<slot>
@@ -25,14 +27,23 @@ export default {
 	name: 'VDay',
 	props: [
 		'size',
+		'range',
 		'option',
-		'isMarked'
+		'isMarked',
 	],
 	computed: {
+		// setStyleDay() {
+		// 	return {
+		// 		flex: `0 1 calc((100% - ${this.size}px) / 7)`,
+		// 		height: `calc((100% - ${this.size}px) / 7)`,
+		// 		fontSize: `${(this.size / 3)}px`,
+		// 	}
+		// },
 		setStyleDay() {
 			return {
-				flex: `0 1 calc((100% - ${this.size}px) / 7)`,
-				height: `calc((100% - ${this.size}px) / 7)`,
+				maxWidth: `${this.size}px`,
+				flex: `1 1 ${this.size}px`,
+				height: `calc(100% / 7)`,
 				fontSize: `${(this.size / 3)}px`,
 			}
 		},
@@ -45,9 +56,9 @@ export default {
 				: null
 		},
 		setClassSelectedDay() {
-			return this.option.isSelected && this.isMarked
-				? 'v-day-box--selected'
-				: null
+		// 	return this.option.isSelected && this.isMarked
+		// 		? 'v-day-box--selected'
+		// 		: null
 		},
 		setClassCurrentDay() {
 			return this.option.isCurrent && this.isMarked
@@ -60,12 +71,33 @@ export default {
 			return isOutsideDays === false
 				? `v-day-box--outside`
 				: null
+		},
+		setClassRangeDays() {
+			const { hover } = this.range
+
+			if (hover.length > 1) {
+				const { date } = this.option
+				// const cdt = new Date(`${year}-${month}-${day}`)
+				const [fdt, sdt] = hover
+
+				if (date > fdt && date < sdt) {
+					return `v-day-box--range-selected`
+				} else {
+					if (date.toJSON() === fdt.toJSON() || date.toJSON() === sdt.toJSON()) {
+						return `v-day-box--selected` 
+					} else {
+						return null
+					}
+				}
+			} else {
+				return null
+			}
 		}
 	},
 	methods: {
-		selectDay() {
+		selectDay(type) {
 			if (this.option.type === 'curr' || this.option.isOutsideDays) {
-				this.$emit('select-day')
+				this.$emit(`${type}-day`)
 			}
 		}
 	}
@@ -79,10 +111,13 @@ export default {
 		border: 2px solid transparent;
 		transition: border .3s;
 		cursor: pointer;
+		border: 1px solid blue;
 
 		&.marked {
 			&:hover {
-				border: 2px solid rgba(31, 31, 51, .1);
+				color: #fff;
+				border: 2px solid transparent;
+				background: rgba(118, 118, 140, .8);
 			}
 		}
 
@@ -115,6 +150,15 @@ export default {
 		&--current {
 			font-weight: 600;
 			border: 2px solid rgba(31, 31, 51, .2);
+
+			&.marked {
+				&:hover {
+					border: 2px solid rgba(31, 31, 51, .1);
+				}
+			}
+		}
+		&--range-selected {
+			background-color: #f6f6fb;
 
 			&.marked {
 				&:hover {

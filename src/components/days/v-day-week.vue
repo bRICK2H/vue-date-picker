@@ -14,13 +14,21 @@ export default {
 		'dayWeek'
 	],
 	computed: {
+		// setStyleDayWeek() {
+		// 	return {
+		// 		fontSize: `${(this.size / 3)}px`,
+		// 		flex: `0 0 calc((100% - ${this.size}px) / 7)`,
+		// 		height: `calc((100% - ${this.size}px) / 7)`,
+		// 	}
+		// }
 		setStyleDayWeek() {
 			return {
+				maxWidth: `${this.size}px`,
+				flex: `1 1 ${this.size}px`,
+				height: `calc(100% / 7)`,
 				fontSize: `${(this.size / 3)}px`,
-				flex: `0 0 calc((100% - ${this.size}px) / 7)`,
-				height: `calc((100% - ${this.size}px) / 7)`,
 			}
-		}
+		},
 	}
 }
 </script>

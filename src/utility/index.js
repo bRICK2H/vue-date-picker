@@ -31,6 +31,7 @@ const generateDays = (options, { initiated, selectable }) => {
 				month,
 				year,
 				isOutsideDays,
+				date: new Date(`${year},${month},${day}`),
 				isCurrent: day === in_day && month === in_month && year === in_year,
 				isSelected: day === se_day && month === se_month && year === se_year,
 			}
